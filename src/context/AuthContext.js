@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginUser = async (values) => {
     setloging(true)
-    const response = await fetch(`${baseURL}/token/`, {
+    const response = await fetch(`${baseURL}auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -35,18 +35,18 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(values)
       })
     const data = await response.json();
-
+    console.log("response.status :  ", response.status);
     if (response.status === 200) {
       setInvalid(false);
       //console.log(data);
       setAuthTokens(data);
-      setUser(jwt_decode(data.access));
+      setUser(jwt_decode(data.accessToken));
       localStorage.setItem("authTokens", JSON.stringify(data));
       router.push('/').then(() => setloging(false))
     } else {
       setInvalid(true);
       setloging(false)
-    }
+    } 
   };
 
   const registerUser = async (username, password, password2) => {
@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (authTokens) {
-      setUser(jwt_decode(authTokens.access));
+      setUser(jwt_decode(authTokens.accessToken));
     }
     setLoading(false);
   }, [authTokens, loading]);

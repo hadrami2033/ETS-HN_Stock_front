@@ -43,11 +43,12 @@ const Login = () =>{
     const [openModal, setOpenModal] = React.useState(false);
     const [openFailedToast, setOpenFailedToast] = React.useState(false);
     const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
+    const [nouser, setNoUser] = React.useState(false);
 
     const validate = (fieldValues = values) => {
       let temp = { ...errors };
-      if ("username" in fieldValues)
-        temp.username = fieldValues.username ? "" : "Utilisateur est réquis";
+      if ("usernameOrEmail" in fieldValues)
+        temp.usernameOrEmail = fieldValues.usernameOrEmail ? "" : "Teléphone est réquis";
       if ("password" in fieldValues)
         temp.password = fieldValues.password.toString().length > 2 ? "" : "Mot de passe est réquis";
       setErrors({
@@ -98,26 +99,19 @@ const Login = () =>{
       }
       setOpenSuccessToast(false);
     };
+
     React.useEffect( async () => {
-      const ronib = await fetch(`${baseURL}/profile/Binor`, {
+      const existUser = await fetch(`${baseURL}auth/existuser`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
         }
       })
-
-      if (ronib.status != 200) {
-        const response = await fetch(`${baseURL}/register/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(defaultUser)
-        })
-        if (response.status === 201) 
-        console.log("default user has been created");
+      if(existUser.status === 201){
+        const exist = await existUser.json()
+        console.log("users exist : ", exist); 
+        setNoUser(!exist)
       }
-
     }, [])
 
     return (
@@ -145,6 +139,7 @@ const Login = () =>{
           <UserForm
             showSuccessToast={showSuccessToast}
             showFailedToast={showFailedToast}
+            first={true}
           />
         </DialogContent>
       </Dialog>
@@ -153,12 +148,11 @@ const Login = () =>{
       <Grid item xs={12} lg={12} alignItems="center" justify="center" 
             style={{
                 maxWidth:500, 
-                borderRadius:20,
-                backgroundColor:'#90d791',
+                borderRadius:20
                 }} >
-        <BaseCard title="Authentification" titleColor={"secondary"}>
+        <BaseCard title="Authentification" titleColor={"primary"}>
         <Stack style={{...styles.stack, marginBottom:30 }}  spacing={10} direction="row">
-                <img src='/static/images/SOGEM.jpg' alt="" />         
+                <img src='/static/images/logo.png' alt="" />         
 
           {/* <Image
             src={userimg}
@@ -180,10 +174,11 @@ const Login = () =>{
 
         <Stack spacing={2} direction="column" style={{marginBottom:20}}>
             <TextField
-              id="username"
-              label="Utilisateur"
-              name="username"
+              id="usernameOrEmail"
+              label="Teléphone"
+              name="usernameOrEmail"
               variant="outlined"
+              type="number"
               onChange={handleInputChange}
             />
             <FormControl sx={{ m: 1, width: '100%' }} variant="outlined" >
@@ -196,12 +191,12 @@ const Login = () =>{
                     endAdornment={
                     <InputAdornment position="end">
                         <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                        >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                          edge="end"
+                          >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                     </InputAdornment>
                     }
@@ -214,7 +209,7 @@ const Login = () =>{
                 onClick={handleSubmit}
                 style={{ fontSize: "20px" }}
                 variant="contained"
-                disabled={loging || !values.username || !values.password }
+                disabled={loging || !values.usernameOrEmail || !values.password }
                 mt={4}
                 fullWidth
             >

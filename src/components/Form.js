@@ -12,7 +12,7 @@ export function Form(initialFValues, validateOnChange = false, validate) {
             ...values,
             [name]: value
         })  
-        console.log(values);
+        //console.log(values);
         if (validateOnChange)
             validate({ [name]: value })
     }

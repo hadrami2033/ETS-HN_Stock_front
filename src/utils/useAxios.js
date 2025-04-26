@@ -13,33 +13,38 @@ const useAxios = () => {
   const router = useRouter()
   const axiosInstance = axios.create({
     baseURL,
-    headers: { Authorization: `Bearer ${authTokens?.access}` }
+    headers: { Authorization: `Bearer ${authTokens?.accessToken}` }
   });
 
   useEffect(() => {
-    if(!authTokens)
-    router.push("/login")
+    if(!authTokens){
+      router.push("/login")
+    }
   }, [])
 
 
   axiosInstance.interceptors.request.use(async req => {
-    const user = jwt_decode(authTokens.access);
+    const user = jwt_decode(authTokens.accessToken);
     const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
     //console.log(user);
     //console.log(isExpired);
     if (!isExpired) return req;
-
-    const response = await axios.post(`${baseURL}/token/refresh/`, {
-      refresh: authTokens.refresh
-    });
-
-    localStorage.setItem("authTokens", JSON.stringify(response.data));
-
-    setAuthTokens(response.data);
-    setUser(jwt_decode(response.data.access));
-
-    req.headers.Authorization = `Bearer ${response.data.access}`;
-    return req;
+    else{
+      localStorage.removeItem("authTokens")
+      router.push("/login")
+      return null
+    }
+    //const response = await axios.post(`${baseURL}/token/refresh/`, {
+    //  refresh: authTokens.refresh
+    //});
+//
+    //localStorage.setItem("authTokens", JSON.stringify(response.data));
+//
+    //setAuthTokens(response.data);
+    //setUser(jwt_decode(response.data.access));
+//
+    //req.headers.Authorization = `Bearer ${response.data.access}`;
+    //return req;
   });
 
   return axiosInstance;

@@ -1,76 +1,35 @@
 const Menuitems = [
   {
-    title: "Home",
+    title: "Home الرئيسية",
     icon: "home",
     href: "/",
   },
   {
-    title: "Dettes",
-    href: "/dettes",
-  },
-  {
-    title: "Conventions",
-    icon: "users",
-    href: "/conventions",
-  },
-  {
-    title: "Utilisateurs",
-    icon: "users",
-    href: "/users",
-  },
- /*  {
-    title: "Engagements",
-    icon: "",
-    href: "/commitments",
-  },
-  {
-    title: "Factures",
+    title: "Opperations العمليات",
     icon: "file-text",
-    href: "/invoices",
-  }, */
+    href: "/opperations",
+  },
   {
-    title: "Paramétrage",
+    title: "Par date حسب التاريخ",
+    icon: "clock",
+    href: "/by_interval",
+  },
+  {
+    title: "Alimentations دخل",
+    icon: "",
+    href: "/entrees",
+  },
+  {
+    title: "Commissions",
     icon: "settings",
     items: [
       {
-        title: "Bailleurs",
-        href: "/funders",
+        title: "Retrait سحب",
+        href: "/comm_retrait",
       },
       {
-        title: "Emprunteurs",
-        href: "/borrowers",
-      },
-      {
-        title: "Prestataires",
-        href: "/contractors",
-      },
-      {
-        title: "Types de catégorie",
-        href: "/categorie_type",
-      },
-      {
-        title: "Devise",
-        href: "/currencies",
-      },
-      {
-        title: "Monnaie de référence",
-        href: "/reference_money",
-      },
-      {
-        title: "Type de décaissement",
-        href: "/disbursementtypes",
-      },
-      {
-        title: "Type de dépense",
-        href: "/spendings_type",
-      },
-      {
-        title: "Statut de décaissement",
-        href: "/status_type",
-      },
-      {
-        title: "Statut de remboursement",
-        href: "/payment_status_type",
+        title: "Versement إيداع",
+        href: "/comm_versement",
       }
     ]
   },

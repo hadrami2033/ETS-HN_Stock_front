@@ -3,14 +3,15 @@ import FeatherIcon from "feather-icons-react";
 import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
 import PropTypes from "prop-types";
 // Dropdown Component
-import SearchDD from "./SearchDD";
 import ProfileDD from "./ProfileDD";
+import Months from "./Months";
+import CurrentYearContainer from "./Year";
 
 const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
   return (
     <AppBar sx={sx} position={position} elevation={0} 
             className={customClass} 
-            style={{backgroundColor:'#6ebb4b'}} 
+            style={{backgroundColor:'#198396'}} 
     >
       <Toolbar>
         
@@ -35,7 +36,7 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
         </IconButton>
 
 
-        <Box flexGrow={1} >
+        {/* <Box flexGrow={1} >
            <Typography
               color={"#F6EEFA"} //2596be
 
@@ -48,11 +49,18 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
             >
               SOCIÉTÉ DE GESTION DE L'ENERGIE DE MANANTALI
             </Typography>
-          </Box>
+          </Box> */}
 
         {/* <Box style={{width:'50px'}} /> */}
         {/* <Box style={{width:'100px'}} /> */}
         
+        <Box flexGrow={1} />
+        <CurrentYearContainer />
+        <Box flexGrow={1} />
+
+        <Months />
+        {/* <Box style={{width:'100px'}} /> */}
+        <Box flexGrow={1} />
 
         <ProfileDD />
         {/* ------------------------------------------- */}

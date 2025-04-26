@@ -28,7 +28,7 @@ export default function MyApp(props) {
     <AuthProvider>
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>SOGEM</title>
+        <title>BANKILY POINT</title>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
 

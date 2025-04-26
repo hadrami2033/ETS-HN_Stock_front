@@ -97,7 +97,7 @@ export default function EnhancedTable() {
   const [openModalUser, setOpenModalUser] = React.useState(false);
 
   const { authTokens } = useContext(AuthContext);
-  const User = authTokens ? jwt_decode(authTokens.access) : {};
+  const User = authTokens ? jwt_decode(authTokens.accessToken) : {};
 
   const router = useRouter()
   const axios = useAxios();

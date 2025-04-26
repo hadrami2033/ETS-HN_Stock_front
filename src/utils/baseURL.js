@@ -1,5 +1,3 @@
 
-//const baseURL = "http://localhost:8000"
-const baseURL = "https://mgmsogem.binorassocies.com/api"
-
+const baseURL = "http://localhost:8080/api/"
 export default baseURL;

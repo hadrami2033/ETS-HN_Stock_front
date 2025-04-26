@@ -22,43 +22,18 @@ import jwt_decode from "jwt-decode";
 
 
 const UserForm = (props) => {
-  const {showSuccessToast, showFailedToast, user} = props;
+  const {showSuccessToast, showFailedToast, user, first=false} = props;
   const [showPassword, setShowPassword] = React.useState(false);
   const [showPassword2, setShowPassword2] = React.useState(false);
 
   const { authTokens } = useContext(AuthContext);
-  const User = authTokens ? jwt_decode(authTokens.access) : null;
-
-  const roles = User ? [
-    {
-      id:"Admin",
-      label:"Admin"
-    },
-    {
-      id:"User",
-      label:"User"
-    },
-    {
-      id:"Agent",
-      label:"Agent"
-    }
-  ] : [
-    {
-      id:"User",
-      label:"User"
-    },
-    {
-      id:"Agent",
-      label:"Agent"
-    }
-  ]
+  const User = authTokens ? jwt_decode(authTokens.accessToken) : null;
 
   const defaultValues = !user ? {
     username: "",
     password: "",
-    password2: "",
-    role: "",
-    is_active: 0,
+    name: "",
+    active: first ? true : false,
   } : user
 
   const [formValues, setFormValues] = useState(defaultValues);
@@ -67,9 +42,9 @@ const UserForm = (props) => {
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
     if ("username" in fieldValues)
-      temp.username = fieldValues.username ? "" : "Utilisateur est réquis";
-    if ("role" in fieldValues)
-      temp.role = fieldValues.role ? "" : "Role est réquis";
+      temp.username = fieldValues.username ? "" : "Télephone est réquis";
+    if ("name" in fieldValues)
+      temp.name = fieldValues.name ? "" : "Nom est réquis";
     if ("password" in fieldValues)
       temp.password = fieldValues.password.toString().length > 7 ? "" : "Mot de passe doit etre de longueur munimum 8";
     if ("password2" in fieldValues)
@@ -100,7 +75,7 @@ const UserForm = (props) => {
     event.preventDefault();
     if (validate()) {
       setLoading(true)
-      const response = await fetch(`${baseURL}/register/`, {
+      const response = await fetch(`${baseURL}auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -134,22 +109,23 @@ const UserForm = (props) => {
       <Grid item xs={12} lg={12} alignItems="center" justify="center">
         <BaseCard title="Nouveau utilisateur">
           <Stack style={styles.stack} spacing={2} direction="column">
-            {!user && <Controls.Input
+            <Controls.Input
+              id="name-input"
+              name="name"
+              label="Nom"
+              type="text"
+              value={values.name}
+              onChange={handleInputChange}
+              error={errors.name}
+            />
+            <Controls.Input
               id="name-input"
               name="username"
-              label="Utilisateur"
-              type="text"
+              label="Téléphone"
+              type="number"
               value={values.username}
               onChange={handleInputChange}
               error={errors.username}
-            />}
-            <Controls.Select
-              name="role"
-              label="Role"
-              value={values.role}
-              onChange={handleInputChange}
-              options={roles}
-              error={errors.role}
             />
             {!user &&
             <FormControl sx={{ m: 1, width: '100%' }} variant="outlined" >

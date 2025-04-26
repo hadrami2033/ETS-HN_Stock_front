@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -7,24 +7,40 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Controls from "../../components/controls/Controls";
 import { useRouter } from "next/router";
+import useAxios from "../../utils/useAxios";
+import baseURL from "../../utils/baseURL";
+import AuthContext from "../../context/AuthContext";
 
 const Buynow = () => {
 
   const [yearId, setYearId] = React.useState(null);
-  const [years, setYears] = React.useState(null);
+  const [years, setYears] = React.useState([]);
   const [open, setOpen] = React.useState(false);
-  const [currentYear, setCurrentYear] = React.useState("");
+  const [currentYear, setCurrentYear] = React.useState(null);
   const router = useRouter()
+  const axios = useAxios();
+  const { logoutUser } = useContext(AuthContext);
 
   React.useEffect(() => {
-
+    if(localStorage.getItem("currentYear"))
+    setCurrentYear(JSON.parse(localStorage.getItem("currentYear")))
+    axios.get(`point/years`).then(
+      res => {
+        setYears(res.data);
+      }, 
+      error => {
+        console.log(error)
+        if(error.response && error.response.status === 401)
+        logoutUser()
+      }
+    )
   }, [])
 
   const handleClose = () =>{
     setOpen(false)
   }
 
-  const handlOpen = () =>{
+  const handlOpen = async () => {
     setOpen(true)
   }
 
@@ -33,6 +49,12 @@ const Buynow = () => {
   }
 
   const saveYear = () =>{
+    if(yearId){
+      setCurrentYear(years.filter(e => e.id === yearId)[0])
+      localStorage.setItem("currentYear", JSON.stringify(years.filter(e => e.id === yearId)[0]))
+      router.reload()
+    }
+    handleClose()
   }
 
   const getYear = e =>{
@@ -60,16 +82,17 @@ const Buynow = () => {
         onClose={handleClose}
         aria-labelledby="draggable-dialog-title"
       >
-        <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"end", fontSize:"24px",fontWeight:"bold", paddingInline:"20px" }} id="draggable-dialog-title">
-             تغيير السنة الحالية
+        <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"center", fontSize:"24px",fontWeight:"bold", paddingInline:"20px" }} id="draggable-dialog-title">
+          Modifier l'année  تغيير السنة
         </DialogTitle>
         <DialogContent style={{width:500,display:"flex" ,justifyContent:"center", fontSize:'25px' }}>
-          <DialogContentText>
+          <DialogContentText style={{width:"80%"}}>
             <br></br>
             <Box  style={{width:'100%' ,display:'flex', justifyContent:'center'}}>
               <Controls.Select
+                style={{width:'100%'}}
                 name="yearId"
-                label="السنة"
+                label="année"
                 value={yearId}
                 onChange={getYear}
                 options={years}
@@ -84,36 +107,36 @@ const Buynow = () => {
             onClick={handleClose}
             style={{fontSize:"24px",fontWeight:"bold"}}
           >
-            إلغاء
+            Annuler
           </Button>
 
           <Button
             disabled={yearId === null}
-            //onClick={saveYear}
+            onClick={saveYear}
             style={{fontSize:"24px",fontWeight:"bold"}}
           >
-            Configurer
+            Confirmer
                     </Button>
         </DialogActions>
         </Dialog>
 
         <Typography variant="h4" fontWeight="700" mb={2}>
-          {currentYear}
+          {currentYear && currentYear.year}
         </Typography>
         <Button
-         // onClick={handlOpen} 
+         onClick={handlOpen} 
           variant="contained"
           color="primary"
           fullWidth
           target="_blank"
-          title="تغيير السنة"
+          title="Modifier l'année  تغيير السنة"
           sx={{ 
             fontSize: "h5.fontSize",
             fontWeight: "700",
             marginBottom: "10px" 
           }}
         >
-          Configurer
+          Modifier تغيير
         </Button>
 
       </Box>

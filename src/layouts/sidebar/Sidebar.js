@@ -24,6 +24,7 @@ import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import jwt_decode from "jwt-decode";
 import { GiMoneyStack, GiShakingHands } from "react-icons/gi";
+import Buynow from "./Buynow";
 
 const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const [open, setOpen] = React.useState(true);
@@ -33,7 +34,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
 
   const { authTokens } = useContext(AuthContext);
-  const User = authTokens ? jwt_decode(authTokens.access) : {};
+  const User = authTokens ? jwt_decode(authTokens.accessToken) : {};
 
   const handleClick = (index) => {
     console.log(index);
@@ -58,7 +59,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
       <LogoIcon />
       <Box mt={2}>
         <List>
-          {Menuitems.filter(e => ( e.href != '/users' || User.role === 'Admin' )) .map((item, index) => (
+          {Menuitems.map((item, index) => (
             <List component="li" disablePadding key={item.title}>
               {!item.items ?
               <NextLink href={item.href}>
@@ -77,35 +78,20 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
                 >
 
                   <ListItemIcon>
-                    {item.href == "/dettes" &&
+                    {item.href == "/entrees" &&
                       <GiMoneyStack 
                       fontSize='30px'
                       color= {`${location === item.href ? "white" : ""}`}                
                     />}
 
-                    { (item.href == "/commitments" || item.href == "/conventions" ) ?
-                      item.href == "/commitments" ? 
-                      <Diversity2Icon 
-                        fontSize='medium'
-                        style={{
-                          color: `${location === item.href ? "white" : ""} `,
-                        }}                      
-                      />
-                      :
-                      <GiShakingHands
-                        fontSize='30px'
-                        style={{
-                          color: `${location === item.href ? "white" : ""} `,
-                        }}                      
-                      />
-                      :
+
                       <FeatherIcon
                         style={{
                           color: `${location === item.href ? "white" : ""} `,
                         }}
                         icon={item.icon}
                       />
-                    }
+                    
                   </ListItemIcon>
 
                   <ListItemText>
@@ -171,6 +157,7 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
           ))}
         </List>
       </Box>
+      <Buynow />
     </Box>
   );
   if (lgUp) {

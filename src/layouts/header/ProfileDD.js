@@ -29,7 +29,7 @@ const ProfileDD = () => {
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const router = useRouter()
   const { authTokens, logoutUser } = useContext(AuthContext);
-  const user = authTokens ? jwt_decode(authTokens.access) : {};
+  const user = authTokens ? jwt_decode(authTokens.accessToken) : {};
 
   const handleClick4 = (event) => {
     setAnchorEl4(event.currentTarget);
