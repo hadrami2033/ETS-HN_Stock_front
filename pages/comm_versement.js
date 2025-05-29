@@ -81,7 +81,7 @@ const Commissions = () => {
   const { logoutUser } = useContext(AuthContext);
 
 
-  useEffect(() => {
+/*   useEffect(() => {
     setLoading(true)
     axios.get(`point/commissionsversement`).then(
         res => {
@@ -97,7 +97,7 @@ const Commissions = () => {
     .then(() => {
       setLoading(false)
     })
-  }, [])
+  }, []) */
 
   let pounds = Intl.NumberFormat( {
     style: 'currency',

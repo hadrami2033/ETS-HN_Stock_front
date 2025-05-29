@@ -6,7 +6,7 @@ import useAxios from "../../utils/useAxios";
 import BlogCard from "./BlogCard";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
-import Solde from "./Solde";
+//import Solde from "./Solde";
 
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
@@ -26,7 +26,7 @@ const Dashboard = () => {
       setOpenVer(false);
     }
   };
-  React.useEffect(() => {
+/*   React.useEffect(() => {
     if(localStorage.getItem("currentYear")){
       setLoading(true)
       axios.get(`point/operations/yearstatistics?yearId=${JSON.parse(localStorage.getItem("currentYear")).id}`).then(
@@ -38,30 +38,15 @@ const Dashboard = () => {
         }, 
         error => {
           console.log(error)
-          if(error.response && error.response.status === 401)
-          logoutUser()
+          //if(error.response && error.response.status === 401)
+          //logoutUser()
         }
       ) 
-      /* .then(() => {
-        axios.get(`point/operations/yearstatistics?yearId=${JSON.parse(localStorage.getItem("currentYear")).id}&typeId=${2}`).then(
-          res => {
-            console.log("yearstatistics  : ",res.data);
-            //console.log("max amount  : ",res.data[12].montantValid);
-            setYearstatistics(res.data);
-            //setSelected(res.data[0])
-          }, 
-          error => {
-            console.log(error)
-            if(error.response && error.response.status === 401)
-            logoutUser()
-          }
-        ) 
-      })  */
       .then(() => {
         setLoading(false)
       })
     }
-  }, [])
+  }, []) */
 
   const options = {
     chart: {
@@ -200,7 +185,7 @@ const Dashboard = () => {
       ) : (<>
     <BaseCard titleColor={"secondary"} title={`VISION GLOBALE D'OPPERATIONS DE LANNEE ${localStorage.getItem("currentYear") ? JSON.parse(localStorage.getItem("currentYear")).year : ""}`}>
 
-      <Solde  />
+      
 
       <BaseCard titleColor={"secondary"} title={`NOMBRE D'OPPERATIONS PAR MOIS`}>
         {yearstatistics.length > 0 && yearstatistics[12].operationValid > 0 ?

@@ -4,7 +4,7 @@ import { GiMoneyStack } from 'react-icons/gi';
 import useAxios from "../../utils/useAxios";
 import AuthContext from "../../context/AuthContext";
 import { IoMdTime } from "react-icons/io";
-import Opperation from "../../../pages/new_entree";
+import Opperation from "../../../pages/product";
 import { Add, Close } from "@mui/icons-material";
 import { GiWallet } from "react-icons/gi";
 
@@ -37,8 +37,8 @@ const Solde = (props) => {
       }, 
       error => {
         console.log(error)
-        if(error.response && error.response.status === 401)
-        logoutUser()
+        //if(error.response && error.response.status === 401)
+        //logoutUser()
       }
     )
     axios.get(`point/types`).then(

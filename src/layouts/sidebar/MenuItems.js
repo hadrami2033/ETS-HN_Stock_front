@@ -5,31 +5,36 @@ const Menuitems = [
     href: "/",
   },
   {
-    title: "Opperations العمليات",
+    title: "Produits",
     icon: "file-text",
-    href: "/opperations",
+    href: "/products",
   },
   {
-    title: "Par date حسب التاريخ",
+    title: "Les achats",
     icon: "clock",
     href: "/by_interval",
   },
   {
-    title: "Alimentations دخل",
+    title: "Clients",
+    icon: "users",
+    href: "/clients",
+  },
+  {
+    title: "Alimentations",
     icon: "",
     href: "/entrees",
   },
   {
-    title: "Commissions",
+    title: "Gestion magasins",
     icon: "settings",
     items: [
       {
-        title: "Retrait سحب",
-        href: "/comm_retrait",
+        title: "Mouvement de stock",
+        href: "/stockmouvments",
       },
       {
-        title: "Versement إيداع",
-        href: "/comm_versement",
+        title: "Les magasins",
+        href: "/magasins",
       }
     ]
   },

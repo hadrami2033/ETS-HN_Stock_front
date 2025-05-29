@@ -34,9 +34,22 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify(values)
       })
-    const data = await response.json();
-    console.log("response.status :  ", response.status);
+    const data = await response.json();    
+    /* console.log("response :  ", data);
+    console.log("response.status :  ", response.status); */
     if (response.status === 200) {
+      const user = await fetch(`${baseURL}auth/byusername?username=${values.usernameOrEmail}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      if (user.status === 201) {
+        const userdata = await user.json(); 
+        console.log("user login : ",userdata);
+        localStorage.setItem("userId", userdata.id);
+        localStorage.setItem("userName", userdata.name);
+      }
       setInvalid(false);
       //console.log(data);
       setAuthTokens(data);
@@ -50,7 +63,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const registerUser = async (username, password, password2) => {
-    const response = await fetch("/api/register/", {
+    const response = await fetch("/auth/register/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

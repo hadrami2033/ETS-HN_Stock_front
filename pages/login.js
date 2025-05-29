@@ -152,7 +152,7 @@ const Login = () =>{
                 }} >
         <BaseCard title="Authentification" titleColor={"primary"}>
         <Stack style={{...styles.stack, marginBottom:30 }}  spacing={10} direction="row">
-                <img src='/static/images/logo.png' alt="" />         
+                <img style={{borderRadius:10}} src='/static/images/logo.png' alt="" />         
 
           {/* <Image
             src={userimg}

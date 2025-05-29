@@ -27,52 +27,34 @@ import Controls from "../src/components/controls/Controls";
 
 const headCellsOpperation = [
     {
-      id: 'phone',
+      id: 'product',
       numeric: false,
       disablePadding: false,
-      label: 'Client الزبون',
+      label: 'Produit',
     }, 
+    {
+      id: 'type',
+      numeric: false,
+      disablePadding: false,
+      label: 'Type de mouvement',
+    },
+    {
+      id: 'quantity',
+      numeric: false,
+      disablePadding: false,
+      label: 'Quantité',
+    },
     {
       id: 'amount',
       numeric: false,
-      disablePadding: false,
-      label: 'Montant المبلغ',
-    },
-    {
-      id: 'trsId',
-      numeric: false,
-      disablePadding: false,
-      label: 'Reférence المرجع',
-    },
+      disablePadding: true,
+      label: 'Montant',
+    },  
     {
       id: 'dateCreation',
       numeric: false,
       disablePadding: false,
-      label: 'Création الإضافة',
-    },
-    {
-      id: 'updatedAt',
-      numeric: false,
-      disablePadding: true,
-      label: 'Modification آخر تغيير',
-    },
-    {
-      id: 'commission',
-      numeric: false,
-      disablePadding: true,
-      label: 'Commission',
-    },
-    {
-      id: 'description',
-      numeric: false,
-      disablePadding: true,
-      label: 'Commentaire شرح',
-    },
-    {
-      id: 'type',
-      numeric: false,
-      disablePadding: true,
-      label: 'Type نوع العملية',
+      label: 'Date de création',
     }
 ]
 
@@ -105,12 +87,12 @@ CustomTabPanel.propTypes = {
 
 const Byinterval = () => {
   const [loading, setLoading] = React.useState(false);
-  const [hasNextVer, setHasNextVer] = React.useState(false);
-  const [pageNumberVer, setPageNumberVer] = React.useState(0);
-  const [pageSizeVer, setPageSizeVer] = React.useState(10);
-  const [totalPagesVer, setTotalPagesVer] = React.useState(0);
-  const [totalVers, setTotalVers] = React.useState(0);
-  const [entrees, setEntrees] = React.useState([]); 
+  const [hasNext, setHasNext] = React.useState(false);
+  const [pageNumber, setPageNumber] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [totalPages, setTotalPages] = React.useState(0);
+  const [total, setTotal] = React.useState(0);
+  const [data, setData] = React.useState([]); 
   const [valid, setValid] = React.useState(false);
   const [openDate, setOpenDate] = React.useState(false)
   const [commissions, setCommissions] = React.useState(0)
@@ -168,28 +150,26 @@ const Byinterval = () => {
 
   useEffect(() => {
     setLoading(true)
-    axios.get(`point/operations/byinterval?startDate=${interval.startDate}&endDate=${interval.endDate}&pageNo=${pageNumberVer}&pageSize=${pageSizeVer}`).then(
+    axios.get(`mouvments/byinterval?type=${2}&startDate=${interval.startDate}&endDate=${interval.endDate}&pageNo=${pageNumber}&pageSize=${pageSize}`).then(
         res => {
-        console.log("versments data : ",res.data);
-        setEntrees(res.data.content);
-        setHasNextVer(!res.data.last)
-        setTotalPagesVer(res.data.totalPages)
-        setTotalVers(res.data.totalElements)
-        getVers(res.data.content)
-        getRets(res.data.content)
-        getCommissions(res.data.content)
-        //setPageNumberVer(res.data.pageNo)
+        setData(res.data.content);
+        setHasNext(!res.data.last)
+        setTotalPages(res.data.totalPages)
+        setTotal(res.data.totalElements)
+        setPageNumber(res.data.pageNo)
       },
       error => {
         console.log(error)
         if(error.response && error.response.status === 401)
-        logoutUser()
+          console.log(error);
+          
+        //logoutUser()
       }
     ) 
     .then(() => {
       setLoading(false)
     })
-  }, [pageSizeVer, pageNumberVer, interval])
+  }, [pageSize, pageNumber, interval])
 
 
   const formatDate = (date) => {
@@ -205,7 +185,7 @@ const Byinterval = () => {
           month = '0' + month;
       if (day.length < 2) 
           day = '0' + day;
-          if (hour.length < 2) 
+      if (hour.length < 2) 
           hour = '0' + hour;
       if (min.length < 2) 
           min = '0' + min;
@@ -221,16 +201,16 @@ const Byinterval = () => {
     minimumFractionDigits: 2
   });
 
-  const handleSelectSizeChangeVer = (event) => {
-    return setPageSizeVer(event.target.value);
+  const handleSelectSize = (event) => {
+    return setPageSize(event.target.value);
   };
 
 
-  const nextVer = () => {
-    setPageNumberVer(pageNumberVer+1)
+  const next = () => {
+    setPageNumber(pageNumber+1)
   }
-  const previousVer = () => {
-    setPageNumberVer(pageNumberVer-1)
+  const previous = () => {
+    setPageNumber(pageNumber-1)
   }
 
   const handleCloseDate = () => {
@@ -248,18 +228,9 @@ const Byinterval = () => {
         startDate: formatDate2(date[0].startDate),
         endDate: formatDate2(date[0].endDate)
     })
-    setPageNumberVer(0);
-    setPageSizeVer(10);
+    setPageNumber(0);
+    setPageSize(10);
     setValid(!valid);
-  }
-
-  const getType = (opp) =>{
-    if(opp.type.label === "entree") return "Alimentation de caisse دخل نقدي"
-    if(opp.type.label === "versement") return "Versement إيداع"
-    if(opp.type.label === "withdrawal") return "Retrait client سحب زبون"
-    if(opp.type.label === "withdrawal2") return "Retrait benéficiaire سحب مستفيد"
-    if(opp.type.label === "wallets") return "Versement dans wallet  إيداع في المحفظة"
-    return '';
   }
 
   
@@ -271,7 +242,7 @@ const Byinterval = () => {
 
   
   return (
-    <BaseCard titleColor={"secondary"} title={"Relève du point   العمليات حسب التاريخ"}>
+    <BaseCard title={"Opérations des achats"}>
         <Dialog maxWidth={'md'} open={openDate} onClose={handleCloseDate}>
             <DialogContent>
             <div style={{display:"flex", justifyContent:"end"}}>
@@ -299,14 +270,14 @@ const Byinterval = () => {
                     color="success"
                     onClick={validSelect}
                 >
-                VALIDER تم
+                VALIDER
                 </Button>
             </div> 
             </DialogContent>
         </Dialog>
 
         <Toolbar
-            style={{display:"flex", justifyContent: "space-between", marginBottom:30}}
+            style={{display:"flex", justifyContent: "center", marginBottom:30}}
             sx={{
             pl: { sm: 2 },
             pr: { xs: 1, sm: 1 },
@@ -316,47 +287,6 @@ const Byinterval = () => {
             }),
             }}
         >
-            <Stack spacing={2} direction="row">
-              <Box style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
-                <Typography
-                    align="right"
-                    color="primary"
-                    variant="subtitle1"
-                    component="div"
-                    fontSize={14}
-                    fontWeight={'bold'}
-                    marginRight="10px"
-                    >
-                    Versements : {totalVers} : العمليات
-                </Typography>
-              </Box>
-              {/* <Box style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
-                <Typography
-                    align="right"
-                    color="primary"
-                    variant="subtitle1"
-                    component="div"
-                    fontSize={14}
-                    fontWeight={'bold'}
-                    marginRight="10px"
-                    >
-                    Retraits  : {rets} : سحب
-                </Typography>
-              </Box> */}
-              <Box style={{display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'center'}}>
-                <Typography
-                    align="right"
-                    color="primary"
-                    variant="subtitle1"
-                    component="div"
-                    fontSize={14}
-                    fontWeight={'bold'}
-                    marginRight="10px"
-                    >
-                    Commissions  : {pounds.format(commissions)} MRU
-                </Typography>
-              </Box>
-            </Stack>
 
             <Stack spacing={2} direction="row" style={{ width:"50%",display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                 <Stack style={{display:'flex', flexDirection:'row', alignItems: 'center', justifyContent:'space-between', width:'80%'}}>
@@ -377,7 +307,7 @@ const Byinterval = () => {
                         disabled={true}
                     />
                 </Stack>
-                <IconButton title="Selectionner un intervalle اختر التاريخ" onClick={() => handleOpenDate() }>
+                <IconButton title="Selectionner un intervalle" onClick={() => handleOpenDate() }>
                     <BsCalendar4Range
                         fontSize='30px'
                         color="#1a7795"
@@ -408,20 +338,20 @@ const Byinterval = () => {
                     </Box>
                     :
                   <Box style={{width:'100%'}}>
-                    {entrees.length > 0 ?
+                    {data.length > 0 ?
                         <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
                         size={'medium'}
                         >
                             <EnhancedTableHead
-                                rowCount={entrees.length}
+                                rowCount={data.length}
                                 headCells={headCellsOpperation}
                                 headerBG="#1A7795"
                                 txtColor="#DCDCDC"
                             />
                             <TableBody>
-                                {entrees
+                                {data
                                 .map((row, index) => {
                                     return (
                                     <TableRow
@@ -431,14 +361,11 @@ const Byinterval = () => {
                                     >
                                         <TableCell align="left"></TableCell>
                                     
-                                        <TableCell align="left">{row.phone}</TableCell>
-                                        <TableCell align="left">{pounds.format(row.amount)} MRU</TableCell>
-                                        <TableCell align="left">{row.trsId}</TableCell>
+                                        <TableCell align="left">{row.product && row.product.nom}</TableCell>
+                                        <TableCell align="left">{row.type && row.type.label}</TableCell>
+                                        <TableCell align="left">{row.quantity}</TableCell>
+                                        <TableCell align="left">{pounds.format(row.amount)} CFA</TableCell>
                                         <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
-                                        <TableCell align="left">{formatDate(row.updatedAt)} </TableCell>
-                                        <TableCell align="left">{pounds.format(row.commission)} MRU</TableCell> 
-                                        <TableCell align="left">{row.description} </TableCell> 
-                                        <TableCell align="left">{getType(row)} </TableCell> 
 
                                     </TableRow>
                                     );
@@ -453,21 +380,21 @@ const Byinterval = () => {
                     </div>
                     }
 
-      {entrees.length > 0 &&
+      {data.length > 0 &&
        <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
             <div style={{width:"50%", display:'flex', alignItems:'center'}}>
               <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
-              Total المجموع : {totalVers}
+              Total : {total}
               </Box>
             </div>
             <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
               <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
-                {pageNumberVer}/{totalPagesVer}
+                {pageNumber}/{totalPages}
               </Box>
 
-              <Tooltip title="Précédente السابق">
+              <Tooltip title="Précédente">
                <span>
-                <IconButton disabled={(pageNumberVer === 0)} onClick={previousVer}>
+                <IconButton disabled={(pageNumber === 0)} onClick={previous}>
                   <ArrowBack/>
                 </IconButton>
                 </span>
@@ -475,21 +402,21 @@ const Byinterval = () => {
 
               <Select
                 id="page-size-select"
-                value={pageSizeVer}
-                onChange={handleSelectSizeChangeVer }
+                value={pageSize}
+                onChange={handleSelectSize }
                 label="pageSize"
               >
-                <MenuItem value={pageSizeVer}>
-                  <em>{pageSizeVer}</em>
+                <MenuItem value={pageSize}>
+                  <em>{pageSize}</em>
                 </MenuItem>
                 <MenuItem value={5}>5</MenuItem>
                 <MenuItem value={10}>10</MenuItem>
                 <MenuItem value={20}>20</MenuItem>
               </Select>  
 
-              <Tooltip title="Suivante التالي">
+              <Tooltip title="Suivante">
                 <span>
-                <IconButton disabled={!hasNextVer} onClick={nextVer} >
+                <IconButton disabled={!hasNext} onClick={next} >
                   <ArrowForward/>
                 </IconButton>
                 </span>

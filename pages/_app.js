@@ -20,15 +20,15 @@ export default function MyApp(props) {
   var res = router.route
 
   React.useEffect(() => {
-    if(!localStorage.getItem("authTokens"))
-    router.push("/login")
+    /* if(!localStorage.getItem("authTokens"))
+    router.push("/login") */
   }, [])
 
   return (
     <AuthProvider>
     <CacheProvider value={emotionCache}>
       <Head>
-        <title>BANKILY POINT</title>
+        <title>ETS-HN STOCK</title>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
 

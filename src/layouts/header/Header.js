@@ -11,7 +11,7 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
   return (
     <AppBar sx={sx} position={position} elevation={0} 
             className={customClass} 
-            style={{backgroundColor:'#198396'}} 
+            style={{backgroundColor:'#15659a'}} 
     >
       <Toolbar>
         
@@ -36,29 +36,29 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
         </IconButton>
 
 
-        {/* <Box flexGrow={1} >
+        <Box flexGrow={1} >
            <Typography
               color={"#F6EEFA"} //2596be
 
-              fontSize="25px" fontWeight={'600'} variant="h3"
+              fontSize="20px" fontWeight={'600'} variant="h3"
               sx={{
                 ml: 1,
               }}
               display={'flex'}
               justifyContent={'center'}
             >
-              SOCIÉTÉ DE GESTION DE L'ENERGIE DE MANANTALI
+              MARCHANDISES & PRODUITS DE BEAUTE & NECESSITES DE CUISINE
             </Typography>
-          </Box> */}
+          </Box>
 
         {/* <Box style={{width:'50px'}} /> */}
         {/* <Box style={{width:'100px'}} /> */}
         
         <Box flexGrow={1} />
-        <CurrentYearContainer />
+        {/* <CurrentYearContainer /> */}
         <Box flexGrow={1} />
 
-        <Months />
+        {/* <Months /> */}
         {/* <Box style={{width:'100px'}} /> */}
         <Box flexGrow={1} />
 

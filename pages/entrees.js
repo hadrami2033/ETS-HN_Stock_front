@@ -19,7 +19,7 @@ import useAxios from "../src/utils/useAxios";
 import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
 import EnhancedTableToolbar from "../src/components/Table/TableOpperationsToolbar"; 
-import Opperation from "./new_entree";
+import Opperation from "./product";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 
 const headCellsOpperation = [
@@ -146,7 +146,7 @@ const Entrees = () => {
   }, [])
 
 
-  useEffect(() => {
+/*   useEffect(() => {
     setLoading(true)
     if(localStorage.getItem("currentYear") && currentMonth)
     axios.get(`point/operations/entrees?status=P&month=${currentMonth.id}&year=${JSON.parse(localStorage.getItem("currentYear")).id}&pageNo=${pageNumberVer}&pageSize=${pageSizeVer}`).then(
@@ -196,7 +196,7 @@ const Entrees = () => {
     else
       setLoading(false)
   }, [pageSizeVer2, pageNumberVer2, currentMonth, search])
-
+ */
   const formatDate = (date) => {
     if(date){
       var d = new Date(date),

@@ -17,7 +17,7 @@ export default function Select(props) {
                 <MenuItem value=""></MenuItem>
                 {
                     options.map(
-                        item => (<MenuItem key={item.id} value={item.id} >{item.year ? item.year : item.month ? item.month : item.label}</MenuItem>)
+                        item => (<MenuItem key={item.id} value={item.id} >{item.label}</MenuItem>)
                     )
                 }
             </MuiSelect>

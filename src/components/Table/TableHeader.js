@@ -29,7 +29,6 @@ function EnhancedTableHead(props) {
 
           {headCells.map((headCell) => (
             <TableCell
-
               style={{backgroundColor:headerBG, paddingLeft:'15px'}}
               key={headCell.id}
               align='left'

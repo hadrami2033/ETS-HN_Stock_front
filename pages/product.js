@@ -14,27 +14,23 @@ import useAxios from "../src/utils/useAxios";
 import { useRouter } from "next/router";
 
 
-const Opperation = (props) => {
-  const {showSuccessToast,showFailedToast, opperation, type, month, year, title, push,update } = props;
+const Product = (props) => {
+  const {showSuccessToast,showFailedToast, product, 
+    title, push,update } = props;
 
   const { authTokens } = useContext(AuthContext);
   const axios = useAxios();
   const router = useRouter()
   const { logoutUser } = useContext(AuthContext);
 
-  const defaultValues = !opperation ? {
-    phone: "00000000",
-    trsId: "00000000000000",
-    amount: 0,
-    commission: 0,
-    status: "P",
+  const defaultValues = !product ? {
+    nom: "",
+    quantiteEnStock: 0,
+    prixAchat: 0.00,
+    prixVente: 0.00,
     dateCreation: "",
-    updatedAt: "",
-    description: "",
-    typeId: type.id,
-    monthId: month,
-    yearId: year
-  } : opperation;
+    description: ""
+  } : product;
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
@@ -42,8 +38,13 @@ const Opperation = (props) => {
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
-    if ("amount" in fieldValues)
-      temp.amount = (fieldValues.amount && fieldValues.amount != "0") ? "" : "Le montant de l'oppération est requis";
+    if ("prixAchat" in fieldValues)
+      temp.prixAchat = (fieldValues.prixAchat && fieldValues.prixAchat != 0.00) ? "" : "prix d'achat est requis";
+    if ("prixVente" in fieldValues)
+      temp.prixVente = (fieldValues.prixVente && fieldValues.prixVente != 0.00) ? "" : "prix de vente est requis";
+    if ("nom" in fieldValues)
+      temp.nom = (fieldValues.nom && fieldValues.nom != "") ? "" : "le nom du produit est requis";
+    
     /* if ("commission" in fieldValues)
       temp.commission = fieldValues.commission ? "" : "Commission est requise "; */
    setErrors({
@@ -53,12 +54,9 @@ const Opperation = (props) => {
     if (fieldValues == values) return Object.values(temp).every((x) => x == "");
   };
 
-  /* useEffect(() => {
-    if(client !== null){
-      console.log("element to edit => ",client);
-      setFormValues(client)
-    }
-  }, [client]) */
+  useEffect(() => {
+    console.log("product : ", product);
+  }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
   
@@ -92,10 +90,11 @@ const Opperation = (props) => {
     if (validate()) {
       setLoading(true)
       //console.log(values);
-      var opp = { ...values, dateCreation : opperation === null ? formatDate(now) : opperation.dateCreation , updatedAt : formatDate(now), amount: parseFloat(values.amount)};
-      if(opperation === null){
-        console.log(opp);
-        axios.post(`point/operations`, opp).then(
+      var prod = { ...values, dateCreation : product === null ? formatDate(now) : product.dateCreation , 
+        prixAchat: parseFloat(values.prixAchat), prixVente: parseFloat(values.prixVente)};
+      if(product === null){
+        console.log(prod);
+        axios.post(`products/add`, prod).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -114,7 +113,7 @@ const Opperation = (props) => {
           setLoading(false)
         }); 
       }else{
-        axios.put(`point/operations/${values.id}`, opp).then(
+        axios.put(`products/${values.id}`, prod).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -139,20 +138,54 @@ const Opperation = (props) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Grid item xs={12} lg={12} alignItems="center" justify="center">
+      <Grid item xs={12} lg={12}  alignItems="center" justify="center">
         <BaseCard title={title}>
           <Stack style={styles.stack} spacing={2} direction="column">
-           <Controls.Input
-              id="amount-input"
-              name="amount"
-              label="Le montant المبلغ"
-              type="number"
-              value={values.amount}
+            <Controls.Input
+              id="nom-input"
+              name="nom"
+              label="Label"
+              type="text"
+              value={values.nom}
               onChange={handleInputChange}
-              error={errors.amount}
+              error={errors.nom}
+            />
+            <Controls.Input
+              id="quantiteEnStock-input"
+              name="quantiteEnStock"
+              label="Quantité En Stock"
+              type="number"
+              value={values.quantiteEnStock}
+              onChange={handleInputChange}
+              error={errors.quantiteEnStock}
+            />
+           <Controls.Input
+              id="prixAchat-input"
+              name="prixAchat"
+              label="Prix d'achat"
+              type="number"
+              value={values.prixAchat}
+              onChange={handleInputChange}
+              error={errors.prixAchat}
+            />
+            <Controls.Input
+              id="prixVente-input"
+              name="prixVente"
+              label="Prix de vente"
+              type="number"
+              value={values.prixVente}
+              onChange={handleInputChange}
+              error={errors.prixVente}
+            />
+            <Controls.TextArea
+              id="description-input"
+              name="description"
+              label="Description تعليق"
+              type="text"
+              value={values.description}
+              onChange={handleInputChange}
             />
           </Stack>
-
           <br />
           <Stack>
           <Button
@@ -193,4 +226,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default Opperation;
+export default Product;

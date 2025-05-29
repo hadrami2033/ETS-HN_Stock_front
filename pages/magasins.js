@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Tooltip, Stack,Snackbar, Box, CircularProgress, Fab } from "@mui/material";
+import { Alert, Tooltip, Stack,Snackbar, Box, CircularProgress, Fab, Select, MenuItem, DialogContentText, Button, DialogActions, DialogTitle, Paper } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
@@ -15,26 +15,25 @@ import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
 import Commission from "./new_commission";
 import EnhancedTableHead from "../src/components/Table/TableHeader";
+import { ArrowBack, ArrowForward } from "@material-ui/icons";
+import Client from "./client";
+import Magasin from "./magasin";
+import Draggable from 'react-draggable';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-const headCellsOpperation = [
+const headCells = [
     {
-      id: 'min',
+      id: 'label',
       numeric: false,
       disablePadding: false,
-      label: 'De من',
+      label: 'Label',
     },
     {
-      id: 'max',
+      id: 'dateCreation',
       numeric: false,
       disablePadding: false,
-      label: "Jusqu'a إلى",
+      label: 'Date de création',
     },
-    {
-        id: 'commission',
-        numeric: false,
-        disablePadding: false,
-        label: 'Commission',
-      },
     {
       id: 'action',
       numeric: false,
@@ -69,13 +68,21 @@ CustomTabPanel.propTypes = {
     value: PropTypes.number.isRequired,
   };
 
-const Commissions = () => {
+const Magasins = () => {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [openVer, setOpenVer] = React.useState(false);
   const [opperationSelected, setOpperationSelected] = React.useState(null);
-  const [commissionsWithdrawal, setCommissionsWithdrawal] = useState([]);
+  const [data, setData] = useState([]);
+  const [hasNext, setHasNext] = React.useState(false);
+  const [pageSize, setPageSize] = React.useState(10);
+  const [totalPages, setTotalPages] = React.useState(0);
+  const [total, setTotal] = React.useState(0);
+  const [pageNumber, setPageNumber] = React.useState(0);
+  const [openDelete, setOpenDelete] = React.useState(false);
+  const [todeleted, setToDeleted] = React.useState(null);
+  const [updated, setUpdate] = React.useState(false);
 
   const axios = useAxios();
   const { logoutUser } = useContext(AuthContext);
@@ -83,21 +90,22 @@ const Commissions = () => {
 
   useEffect(() => {
     setLoading(true)
-    axios.get(`point/commissionswithdrawal`).then(
+    axios.get(`magasins/all`).then(
         res => {
-            //console.log("commissionswithdrawal  ", res.data);
-            setCommissionsWithdrawal(res.data);
+            console.log("data  ", res.data);
+            setData(res.data);
         }, 
         error => {
           console.log(error)
           if(error.response && error.response.status === 401)
-          logoutUser()
-        }
+            //logoutUser()
+            console.log(error);
+          }
       )
     .then(() => {
       setLoading(false)
     })
-  }, [])
+  }, [updated])
 
   let pounds = Intl.NumberFormat( {
     style: 'currency',
@@ -143,15 +151,16 @@ const Commissions = () => {
 
   const pushVer = (e) =>{
     setLoading(true)
-    axios.get(`point/commissionswithdrawal`).then(
+    axios.get(`magasins/all`).then(
         res => {
-            //console.log("commissionswithdrawal  ", res.data);
-            setCommissionsWithdrawal(res.data);
+          setData(res.data);
         }, 
         error => {
           console.log(error)
           if(error.response && error.response.status === 401)
-          logoutUser()
+          //logoutUser()
+          console.log(error);
+          
         }
       )  
       .then(() => {
@@ -162,15 +171,16 @@ const Commissions = () => {
   const updateVer = (e) =>{
     setOpperationSelected(null)
     setLoading(true)
-    axios.get(`point/commissionswithdrawal`).then(
+    axios.get(`magasins/all`).then(
         res => {
-            //console.log("commissionswithdrawal  ", res.data);
-            setCommissionsWithdrawal(res.data);
+          setData(res.data);
         }, 
         error => {
           console.log(error)
           if(error.response && error.response.status === 401)
-          logoutUser()
+          //logoutUser()
+          console.log(error);
+        
         }
       )
       .then(() => {
@@ -183,11 +193,73 @@ const Commissions = () => {
     setOpenVer(true)
   }
  
+  const formatDate = (date) => {
+    if(date){
+      var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear(),
+          hour = '' + d.getHours(),
+          min = '' + d.getMinutes();
 
+      if (month.length < 2) 
+          month = '0' + month;
+      if (day.length < 2) 
+          day = '0' + day;
+          if (hour.length < 2) 
+          hour = '0' + hour;
+      if (min.length < 2) 
+          min = '0' + min;
+  
+      return [day, month, year].join('-') //+ "  " + [hour, min].join(':')
+      ;
+    }else return null
+  }
 
+  
+  const handleCloseModalDelete = () =>{
+    setOpenDelete(false)
+    setToDeleted(null)
+  }
+
+  const handleOpenModalDelete = () =>{
+    setOpenDelete(true)
+  }
+
+  const deleteClick = (row) => {
+    setToDeleted(row)
+    handleOpenModalDelete()
+  }
+
+  const remove = () =>{
+    axios.delete(`magasins/${todeleted.id}`).then(
+      res => {
+          const index = data.indexOf(todeleted);
+          data.splice(index, 1);
+          setUpdate(!updated)
+          handleCloseModalDelete()
+          showSuccessToast()
+      },
+      error => {
+        console.log(error)
+        showFailedToast()
+      }
+    )  
+    }
+
+    const PaperComponent = (props) => {
+      return (
+        <Draggable
+          handle="#draggable-dialog-title"
+          cancel={'[class*="MuiDialogContent-root"]'}
+        >
+          <Paper {...props} />
+        </Draggable>
+      );
+    } 
 
   return (
-    <BaseCard titleColor={"secondary"} title={"Commissions de retrait"}>
+    <BaseCard title={"Les magasins"}>
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
                 <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
                     L'oppération réussie تمت العملية بنجاح
@@ -199,7 +271,31 @@ const Commissions = () => {
                     L'oppération a échoué فشل في العملية!
                 </Alert>
             </Snackbar>
-            
+
+            <Dialog 
+              open={openDelete}
+              onClose={handleCloseModalDelete}
+              PaperComponent={PaperComponent}
+              aria-labelledby="draggable-dialog-title"
+            >
+                <DialogTitle style={{ cursor: 'move', display:"flex" ,justifyContent:"end" , fontSize:"24px",fontWeight:"bold" }} id="draggable-dialog-title">
+                  Suppression
+                </DialogTitle>
+                <DialogContent style={{width:300,display:"flex" ,justifyContent:"center" }}>
+                  <DialogContentText>
+                    Confirmer l'oppération
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <Button style={{fontSize:"24px",fontWeight:"bold"}} autoFocus onClick={handleCloseModalDelete}>
+                    Annuler
+                  </Button>
+                  <Button style={{fontSize:"24px",fontWeight:"bold"}} onClick={remove}>
+                    Supprimer
+                  </Button>
+                </DialogActions>
+            </Dialog>
+
             <Dialog fullWidth={true} maxWidth={'sm'} open={openVer} onClose={handleCloseVer}>
                 <DialogContent>
                 <div style={{display:"flex", justifyContent:"end"}}>
@@ -207,10 +303,9 @@ const Commissions = () => {
                     <Close fontSize='medium'/>
                     </IconButton>
                 </div>
-                <Commission
-                    opperation = {opperationSelected}
-                    type = {'ret'}
-                    title={"Commission de retrait"}
+                <Magasin
+                    magasin = {opperationSelected}
+                    title={"Ajouter une magasin"}
                     push={pushVer}
                     update={updateVer}
                     showSuccessToast={showSuccessToast}
@@ -220,9 +315,7 @@ const Commissions = () => {
             </Dialog>
 
             <Box sx={{ width: '100%', marginTop:'35px', marginLeft: '15px', whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden'}}>
-
-
-                    <Stack spacing={2} direction="row" mb={2} >
+                  <Stack spacing={2} direction="row" mb={2} >
                       <Tooltip title="Ajouter">
                         <Fab color="primary"  size="medium" aria-label="Ajouter" onClick={openAddVersement}>
                             <Add/>
@@ -243,20 +336,20 @@ const Commissions = () => {
                     </Box>
                     :
                   <Box style={{width:'100%'}}>
-                    {commissionsWithdrawal.length > 0 ?
+                    {data.length > 0 ?
                         <Table
                         sx={{ minWidth: 750 }}
                         aria-labelledby="tableTitle"
                         size={'medium'}
                         >
                             <EnhancedTableHead
-                                rowCount={commissionsWithdrawal.length}
-                                headCells={headCellsOpperation}
+                                rowCount={data.length}
+                                headCells={headCells}
                                 headerBG="#1A7795"
                                 txtColor="#DCDCDC"
                             />
                             <TableBody>
-                                {commissionsWithdrawal
+                                {data
                                 .map((row, index) => {
                                     return (
                                     <TableRow
@@ -266,15 +359,21 @@ const Commissions = () => {
                                     >
                                         <TableCell align="left"></TableCell>
                                     
-                                        <TableCell align="left">{pounds.format(row.min)} MRU</TableCell>
-                                        <TableCell align="left">{pounds.format(row.max)} MRU </TableCell>
-                                        <TableCell align="left">{pounds.format(row.commission)} MRU </TableCell>
+                                        <TableCell align="left">{row.label}  </TableCell>
+                                        <TableCell align="left">{formatDate(row.dateCreation)}  </TableCell>
                                         <TableCell align="left">
-                                          <Tooltip onClick={() => editVer(row)} title="Detail">
-                                            <IconButton>
-                                              <CreateOutlined fontSize='medium' />
-                                            </IconButton>
-                                          </Tooltip>
+                                        <Box style={{display:"flex", flexDirection:"row"}} >
+                                            <Tooltip onClick={() => editVer(row)} title="Detail">
+                                                <IconButton>
+                                                <CreateOutlined fontSize='medium' />
+                                                </IconButton>
+                                            </Tooltip>
+                                            <Tooltip onClick={() => deleteClick(row)} title="Supprimer">
+                                                <IconButton>
+                                                    <DeleteIcon color='danger' fontSize='large'/>
+                                                </IconButton>
+                                            </Tooltip>
+                                         </Box>
                                         </TableCell>
 
                                     </TableRow>
@@ -299,4 +398,4 @@ const Commissions = () => {
   );
 };
 
-export default Commissions;
+export default Magasins;

@@ -30,8 +30,8 @@ const Buynow = () => {
       }, 
       error => {
         console.log(error)
-        if(error.response && error.response.status === 401)
-        logoutUser()
+        //if(error.response && error.response.status === 401)
+        //logoutUser()
       }
     )
   }, [])

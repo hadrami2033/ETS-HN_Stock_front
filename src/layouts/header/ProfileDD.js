@@ -29,7 +29,7 @@ const ProfileDD = () => {
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const router = useRouter()
   const { authTokens, logoutUser } = useContext(AuthContext);
-  const user = authTokens ? jwt_decode(authTokens.accessToken) : {};
+  const user = localStorage.getItem("userName");
 
   const handleClick4 = (event) => {
     setAnchorEl4(event.currentTarget);
@@ -87,6 +87,7 @@ const ProfileDD = () => {
           Vous avez rencontré un probléme !
         </Alert>
       </Snackbar>
+      
       <Dialog fullWidth={true} open={openModal} onClose={handleCloseModal}>
         <DialogContent>
           <div style={{display:"flex", justifyContent:"end"}}>
@@ -100,6 +101,7 @@ const ProfileDD = () => {
           />
         </DialogContent>
       </Dialog>
+
       <Button
         aria-label="menu"
         color="inherit"
@@ -129,7 +131,7 @@ const ProfileDD = () => {
               color={"#F6EEFA"}
               mx={1}
             >
-              {user.username}
+              {user}
             </Typography>
             <FeatherIcon icon="chevron-down" width="20" color={"#F6EEFA"} height="20"/>
           </Box>
@@ -147,7 +149,7 @@ const ProfileDD = () => {
           },
         }}
       >
-        <Box>
+      <Box>
         {/*           <Box p={2} pt={0}>
             <List
               component="nav"
