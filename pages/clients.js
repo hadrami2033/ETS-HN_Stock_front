@@ -13,7 +13,6 @@ import IconButton from '@mui/material/IconButton';
 import useAxios from "../src/utils/useAxios";
 import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
-import Commission from "./new_commission";
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Client from "./client";
@@ -107,7 +106,7 @@ const Clients = () => {
         error => {
           console.log(error)
           if(error.response && error.response.status === 401)
-            //logoutUser()
+            logoutUser()
             console.log(error);
           }
       )
@@ -115,12 +114,6 @@ const Clients = () => {
       setLoading(false)
     })
   }, [pageSize, pageNumber, updated])
-
-  let pounds = Intl.NumberFormat( {
-    style: 'currency',
-    maximumSignificantDigits: 3,
-    minimumFractionDigits: 2
-  });
 
   const closeFailedToast = (event, reason) => {
     if (reason === 'clickaway') {
@@ -285,7 +278,7 @@ const Clients = () => {
  } 
 
   return (
-    <BaseCard title={"Les clients"}>
+    <BaseCard titleColor={"primary"} title={"Les clients"}>
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
                 <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
                     L'oppération réussie تمت العملية بنجاح
@@ -391,7 +384,7 @@ const Clients = () => {
                                         <TableCell align="left">{formatDate(row.dateCreation)}  </TableCell>
                                         <TableCell align="left">
                                         <Box style={{display:"flex", flexDirection:"row"}} >
-                                            <Tooltip onClick={() => editVer(row)} title="Detail">
+                                            <Tooltip onClick={() => editVer(row)} title="Edit">
                                                 <IconButton>
                                                 <CreateOutlined fontSize='medium' />
                                                 </IconButton>

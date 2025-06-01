@@ -242,7 +242,7 @@ const Byinterval = () => {
 
   
   return (
-    <BaseCard title={"Opérations des achats"}>
+    <BaseCard titleColor={"primary"} title={"Opérations de ventes"}>
         <Dialog maxWidth={'md'} open={openDate} onClose={handleCloseDate}>
             <DialogContent>
             <div style={{display:"flex", justifyContent:"end"}}>

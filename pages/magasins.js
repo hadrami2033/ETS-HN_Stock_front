@@ -13,10 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import useAxios from "../src/utils/useAxios";
 import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
-import Commission from "./new_commission";
 import EnhancedTableHead from "../src/components/Table/TableHeader";
-import { ArrowBack, ArrowForward } from "@material-ui/icons";
-import Client from "./client";
 import Magasin from "./magasin";
 import Draggable from 'react-draggable';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -75,11 +72,6 @@ const Magasins = () => {
   const [openVer, setOpenVer] = React.useState(false);
   const [opperationSelected, setOpperationSelected] = React.useState(null);
   const [data, setData] = useState([]);
-  const [hasNext, setHasNext] = React.useState(false);
-  const [pageSize, setPageSize] = React.useState(10);
-  const [totalPages, setTotalPages] = React.useState(0);
-  const [total, setTotal] = React.useState(0);
-  const [pageNumber, setPageNumber] = React.useState(0);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [todeleted, setToDeleted] = React.useState(null);
   const [updated, setUpdate] = React.useState(false);
@@ -106,12 +98,6 @@ const Magasins = () => {
       setLoading(false)
     })
   }, [updated])
-
-  let pounds = Intl.NumberFormat( {
-    style: 'currency',
-    maximumSignificantDigits: 3,
-    minimumFractionDigits: 2
-  });
 
   const closeFailedToast = (event, reason) => {
     if (reason === 'clickaway') {
@@ -259,7 +245,7 @@ const Magasins = () => {
     } 
 
   return (
-    <BaseCard title={"Les magasins"}>
+    <BaseCard titleColor={"primary"} title={"Les magasins"}>
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
                 <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
                     L'oppération réussie تمت العملية بنجاح

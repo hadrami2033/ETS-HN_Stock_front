@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Alert, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress, Fab, Paper, Select, MenuItem, Checkbox  } from "@mui/material";
+import React, { useEffect } from "react";
+import { Alert, Button, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress, Fab, Paper, Select, MenuItem, Checkbox  } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
@@ -13,17 +13,15 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Draggable from 'react-draggable';
-import { Add, Close, CreateOutlined, Delete, InfoOutlined } from '@mui/icons-material';
+import { Add, Close } from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
 import useAxios from "../src/utils/useAxios";
 import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
 import EnhancedTableToolbar from "../src/components/Table/TableProductsToolbar"; 
-import Opperation from "./new_opperation";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import Product from "./product";
 import Invoice from "./invoice";
-import Purchase from "./purchase";
 
 const headCellsOpperation = [
     {
@@ -106,9 +104,7 @@ const Products = () => {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [openDeleteComm, setOpenDeleteComm] = React.useState(false);
   const [updated, setUpdate] = React.useState(false);
-  const [commToDelete, setCommToDelete] = React.useState(null);
   const [hasNext, setHasNext] = React.useState(false);
   const [pageSize, setPageSize] = React.useState(10);
   const [totalPages, setTotalPages] = React.useState(0);
@@ -119,39 +115,12 @@ const Products = () => {
   const [totalPages2, setTotalPages2] = React.useState(0);
   const [total2, setTotal2] = React.useState(0);
   const [pageNumber2, setPageNumber2] = React.useState(0);
-
-  const [totalRets, setTotalRets] = React.useState(0);
-  const [totalRets2, setTotalRets2] = React.useState(0);
-  const [hasNextRet, setHasNextRet] = React.useState(false);
-  const [pageNumberRet, setPageNumberRet] = React.useState(0);
-  const [totalPagesRet, setTotalPagesRet] = React.useState(0);
-  const [hasNextRet2, setHasNextRet2] = React.useState(false);
-  const [pageSizeRet2, setPageSizeRet2] = React.useState(10);
-  const [totalPagesRet2, setTotalPagesRet2] = React.useState(0);
-  const [allMonths, setAllMonths] = React.useState([]); 
-  const [types, setTypes] = React.useState([]);
-  const [hasPrevious, setHasPrevious] = React.useState(false);
-  const [retraits, setRetraits] = React.useState([]); 
-  const [retraits2, setRetraits2] = React.useState([]); 
   const [data, setData] = React.useState([]); 
   const [data2, setData2] = React.useState([]); 
-  const [retraitType, setRetraitType] = React.useState([]); 
-  const [retrait2Type, setRetrait2Type] = React.useState(null); 
-  const [versementType, setVersementType] = React.useState([]); 
-  const [currentMonth, setCurrentMonth] = React.useState(localStorage.getItem("currentMonth") ? JSON.parse(localStorage.getItem("currentMonth")) : null);
   const [getBy, setGetBy] = React.useState("")
   const [search, setSearch] = React.useState("")
-  const [openVer, setOpenVer] = React.useState(false);
   const [open, setOpen] = React.useState(false);
   const [openInvoice, setOpenInvoice] = React.useState(false);
-  const [openRet2, setOpenRet2] = React.useState(false);
-  const [opperationSelected, setOpperationSelected] = React.useState(null);
-  const [yearWalletSolde, setYearWalletSolde] = React.useState(0);
-  const [yearVersementSolde, setYearVersementSolde] = React.useState(0);
-  const [yearWithdrawalSolde, setYearWithdrawalSolde] = React.useState(0);
-  const [yearWithdrawal2Solde, setYearWithdrawal2Solde] = React.useState(0);
-  const [yearEntreeSolde, setYearEntreeSolde] = React.useState(0);
-  const [newOpp, setNewOpp] = React.useState(false);
   const [selected, setSelected] = React.useState(false);
   const [listSelected, setListSelected] = React.useState([]);
   const [openDelete, setOpenDelete] = React.useState(false);
@@ -296,10 +265,6 @@ const Products = () => {
     })
   }
 
-  const handleOpenModalDeleteComm = () =>{
-    setOpenDeleteComm(true)
-  }
-
   const editClick = () =>{
     setOpen(true)
   }
@@ -426,7 +391,7 @@ const Products = () => {
         showFailedToast={showFailedToast}
     /> 
     :
-    <BaseCard title={"Les produits"}>
+    <BaseCard titleColor={"primary"} title={"Les produits"}>
 
             <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
                 <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>

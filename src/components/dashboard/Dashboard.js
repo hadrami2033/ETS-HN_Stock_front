@@ -6,6 +6,7 @@ import useAxios from "../../utils/useAxios";
 import BlogCard from "./BlogCard";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
+import Solde from "./Solde";
 //import Solde from "./Solde";
 
 
@@ -179,31 +180,15 @@ const Dashboard = () => {
           sx={{
             color: 'primary',
           }}
-      />
+      />  
     </div>
 
       ) : (<>
-    <BaseCard titleColor={"secondary"} title={`VISION GLOBALE D'OPPERATIONS DE LANNEE ${localStorage.getItem("currentYear") ? JSON.parse(localStorage.getItem("currentYear")).year : ""}`}>
+    <BaseCard titleColor={"primary"} title={`SOLDE DE LA CAISSE`}>
 
       
-
-      <BaseCard titleColor={"secondary"} title={`NOMBRE D'OPPERATIONS PAR MOIS`}>
-        {yearstatistics.length > 0 && yearstatistics[12].operationValid > 0 ?
-          <Chart
-            options={options}
-            series={seriesyearstatistics}
-            type="bar"
-            height="295px"
-          />
-          :
-          <div style={{width:'100%', fontSize:'20px', display:'flex', justifyContent:'center'}}>
-            Liste vide
-          </div>
-        } 
-      </BaseCard>
-      {yearstatistics.length > 0 &&
-      <BlogCard statics = {yearstatistics} />
-      }
+        <Solde/>
+    
     </BaseCard>
     </>
     )

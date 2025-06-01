@@ -23,8 +23,10 @@ import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import jwt_decode from "jwt-decode";
-import { GiMoneyStack, GiShakingHands } from "react-icons/gi";
-import Buynow from "./Buynow";
+import { GiMoneyStack } from "react-icons/gi";
+import { TbCashBanknoteOff } from "react-icons/tb";
+
+
 
 const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
   const [open, setOpen] = React.useState(true);
@@ -78,12 +80,17 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
                 >
 
                   <ListItemIcon>
-                    {item.href == "/entrees" &&
-                      <GiMoneyStack 
+                    {item.href == "/debts" &&
+                      <TbCashBanknoteOff 
                       fontSize='30px'
                       color= {`${location === item.href ? "white" : ""}`}                
                     />}
 
+                    {item.href == "/" &&
+                      <GiMoneyStack 
+                      fontSize='30px'
+                      color= {`${location === item.href ? "white" : ""}`}                
+                    />}
 
                       <FeatherIcon
                         style={{
@@ -157,7 +164,6 @@ const Sidebar = ({ isMobileSidebarOpen, onSidebarClose, isSidebarOpen }) => {
           ))}
         </List>
       </Box>
-      <Buynow />
     </Box>
   );
   if (lgUp) {

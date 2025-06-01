@@ -1,7 +1,7 @@
 const Menuitems = [
   {
-    title: "Home الرئيسية",
-    icon: "home",
+    title: "Caisse",
+    icon: "",
     href: "/",
   },
   {
@@ -10,7 +10,7 @@ const Menuitems = [
     href: "/products",
   },
   {
-    title: "Les achats",
+    title: "Historique de ventes",
     icon: "clock",
     href: "/by_interval",
   },
@@ -20,13 +20,13 @@ const Menuitems = [
     href: "/clients",
   },
   {
-    title: "Alimentations",
+    title: "Les dettes",
     icon: "",
-    href: "/entrees",
+    href: "/debts",
   },
   {
     title: "Gestion magasins",
-    icon: "settings",
+    icon: "database",
     items: [
       {
         title: "Mouvement de stock",

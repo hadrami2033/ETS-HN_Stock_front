@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Alert, Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress, Fab, Paper, Select, MenuItem, Checkbox  } from "@mui/material";
+import React, { useEffect } from "react";
+import { Alert, Tooltip, Snackbar, Box, CircularProgress, Select, MenuItem, Checkbox  } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
@@ -8,22 +8,14 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Draggable from 'react-draggable';
-import { Add, Close, CreateOutlined, Delete, InfoOutlined } from '@mui/icons-material';
+import { Close } from '@mui/icons-material';
 import IconButton from '@mui/material/IconButton';
 import useAxios from "../src/utils/useAxios";
 import { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
 import EnhancedTableToolbar from "../src/components/Table/TableStockMouvmentsToolbar"; 
-import Opperation from "./new_opperation";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
-import Product from "./product";
-import Invoice from "./invoice";
-import Purchase from "./purchase";
 import Infos from "./mouvment_info";
 
 const headCellsOpperation = [
@@ -85,82 +77,27 @@ CustomTabPanel.propTypes = {
     index: PropTypes.number.isRequired,
     value: PropTypes.number.isRequired,
   };
-  
-function a11yProps(index) {
-    return {
-      id: `simple-tab-${index}`,
-      'aria-controls': `simple-tabpanel-${index}`,
-    };
-  }
-
-
-
 
 const Products = () => {
-  const [value, setValue] = React.useState(0);
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [openDeleteComm, setOpenDeleteComm] = React.useState(false);
-  const [updated, setUpdate] = React.useState(false);
-  const [commToDelete, setCommToDelete] = React.useState(null);
   const [hasNext, setHasNext] = React.useState(false);
   const [pageSize, setPageSize] = React.useState(10);
   const [totalPages, setTotalPages] = React.useState(0);
   const [total, setTotal] = React.useState(0);
   const [pageNumber, setPageNumber] = React.useState(0);
-  const [hasNext2, setHasNext2] = React.useState(false);
-  const [pageSize2, setPageSize2] = React.useState(10);
-  const [totalPages2, setTotalPages2] = React.useState(0);
-  const [total2, setTotal2] = React.useState(0);
-  const [pageNumber2, setPageNumber2] = React.useState(0);
-
-  const [totalRets, setTotalRets] = React.useState(0);
-  const [totalRets2, setTotalRets2] = React.useState(0);
-  const [hasNextRet, setHasNextRet] = React.useState(false);
-  const [pageNumberRet, setPageNumberRet] = React.useState(0);
-  const [totalPagesRet, setTotalPagesRet] = React.useState(0);
-  const [hasNextRet2, setHasNextRet2] = React.useState(false);
-  const [pageSizeRet2, setPageSizeRet2] = React.useState(10);
-  const [totalPagesRet2, setTotalPagesRet2] = React.useState(0);
-  const [allMonths, setAllMonths] = React.useState([]); 
-  const [types, setTypes] = React.useState([]);
-  const [hasPrevious, setHasPrevious] = React.useState(false);
-  const [retraits, setRetraits] = React.useState([]); 
-  const [retraits2, setRetraits2] = React.useState([]); 
   const [data, setData] = React.useState([]); 
-  const [data2, setData2] = React.useState([]); 
-  const [retraitType, setRetraitType] = React.useState([]); 
-  const [retrait2Type, setRetrait2Type] = React.useState(null); 
-  const [versementType, setVersementType] = React.useState([]); 
-  const [currentMonth, setCurrentMonth] = React.useState(localStorage.getItem("currentMonth") ? JSON.parse(localStorage.getItem("currentMonth")) : null);
   const [getBy, setGetBy] = React.useState("")
   const [search, setSearch] = React.useState("")
-  const [openVer, setOpenVer] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const [openInvoice, setOpenInvoice] = React.useState(false);
-  const [openRet2, setOpenRet2] = React.useState(false);
-  const [opperationSelected, setOpperationSelected] = React.useState(null);
-  const [yearWalletSolde, setYearWalletSolde] = React.useState(0);
-  const [yearVersementSolde, setYearVersementSolde] = React.useState(0);
-  const [yearWithdrawalSolde, setYearWithdrawalSolde] = React.useState(0);
-  const [yearWithdrawal2Solde, setYearWithdrawal2Solde] = React.useState(0);
-  const [yearEntreeSolde, setYearEntreeSolde] = React.useState(0);
-  const [newOpp, setNewOpp] = React.useState(false);
   const [selected, setSelected] = React.useState(null);
-  const [listSelected, setListSelected] = React.useState([]);
-  const [openDelete, setOpenDelete] = React.useState(false);
-  const [productSelected, setProductSelected] = React.useState(null);
   const [magasinSelected, setMagasinSelected] = React.useState(null);
   const [magasins, setMagasins] = React.useState([]); 
   const [typeId, setTypeId] = React.useState(1); 
   const [quantityEnStock, setQuantityEnStock] = React.useState(0); 
  
   const axios = useAxios();
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-    setListSelected([])
-  };
   const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
@@ -175,8 +112,8 @@ const Products = () => {
         }, 
         error => {
           console.log(error)
-          //if(error.response && error.response.status === 401)
-          //logoutUser()
+          if(error.response && error.response.status === 401)
+          logoutUser()
         }
       )
       .then(() => {
@@ -247,17 +184,8 @@ const Products = () => {
     if (reason === "backdropClick") {
       console.log(reason);
     } else {
-      setListSelected([])
-      setProductSelected(null)
       setOpen(false);
     }
-  };
-
-  const handleCloseInvoice = () => {
-      setListSelected([])
-      setProductSelected(null)
-      setOpenInvoice(false);
-      setUpdate(!updated)
   };
 
   const showFailedToast = () => {
@@ -268,43 +196,8 @@ const Products = () => {
     setOpenSuccessToast(true);
   };
 
-  const push = (e) =>{
-    setProductSelected(null)
-    setLoading(true)
-    axios.get(`products/all?nom=${getBy}&pageNo=${pageNumber}&pageSize=${pageSize}`).then(
-      res => {
-        //console.log("all products : ",res.data);
-        setData(res.data.content);
-        setHasNext(!res.data.last)
-        setTotalPages(res.data.totalPages)
-        setTotal(res.data.totalElements)
-        setPageNumber(res.data.pageNo)
-      }, 
-      error => {
-        console.log(error)
-        //if(error.response && error.response.status === 401)
-        //logoutUser()
-      }
-    )   
-    .then(() => {
-    setLoading(false)
-    })
-  }
-
-  const handleOpenModalDeleteComm = () =>{
-    setOpenDeleteComm(true)
-  }
-
-  const editClick = () =>{
-    setOpen(true)
-  }
-
   const openModal = () =>{
     setOpen(true)
-  }
-  
-  const commandClick = () =>{
-    setOpenInvoice(true)
   }
 
   const isSelected = (id) => {
@@ -334,17 +227,6 @@ const Products = () => {
   const previous = () => {
     setPageNumber(pageNumber-1)
   }
-
-  const handleSelectSizeChange2 = (event) => {    
-    return setPageSize2(event.target.value);
-  };
-
-  const next2 = () => {
-    setPageNumber2(pageNumber2+1)
-  }
-  const previous2 = () => {
-    setPageNumber2(pageNumber2-1)
-  }
   
   const handleClick = (event, row) => {
     if(!isSelected(row.id)){
@@ -353,13 +235,6 @@ const Products = () => {
         setSelected(null);
     }
    }
-
-  const handleOpenModalDelete = () =>{
-    setOpenDelete(true)
-  }
-  const handleCloseModalDelete = () =>{
-    setOpenDelete(false)
-  }
 
   const importProduct = () => {
     setTypeId(1)

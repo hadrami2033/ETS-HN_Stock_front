@@ -4,8 +4,6 @@ import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
 import PropTypes from "prop-types";
 // Dropdown Component
 import ProfileDD from "./ProfileDD";
-import Months from "./Months";
-import CurrentYearContainer from "./Year";
 
 const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
   return (
@@ -47,7 +45,7 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
               display={'flex'}
               justifyContent={'center'}
             >
-              MARCHANDISES & PRODUITS DE BEAUTE & NECESSITES DE CUISINE
+              MARCHANDISES & PRODUITS DE BEAUTÉ & NÉCESSITES DE CUISINE
             </Typography>
           </Box>
 
@@ -55,10 +53,8 @@ const Header = ({ sx, customClass, toggleMobileSidebar, position }) => {
         {/* <Box style={{width:'100px'}} /> */}
         
         <Box flexGrow={1} />
-        {/* <CurrentYearContainer /> */}
         <Box flexGrow={1} />
 
-        {/* <Months /> */}
         {/* <Box style={{width:'100px'}} /> */}
         <Box flexGrow={1} />
 

@@ -93,8 +93,8 @@ const Invoice = (props) => {
       }, 
       error => {
         console.log(error)
-        //if(error.response && error.response.status === 401)
-        //logoutUser()
+        if(error.response && error.response.status === 401)
+        logoutUser()
       }
     ).then(() => {
       axios.get(`cachier/1`).then(
@@ -228,9 +228,11 @@ const Invoice = (props) => {
         addMouvmentsAndUpdateProducts(now)
         let debt = {
           dateCreation: formatDate(now),
+          updatedAt: formatDate(now),
           amount: invoiceAmount-paidAmount,
           clientId: client.id,
           payed: 0,
+          amountPayed:0,
           description: ""
         }
 
@@ -321,7 +323,7 @@ const Invoice = (props) => {
               id={e.id+'quantite-commande'}
               onChange={(event) => onChangeQuantity(event, e, index)}
               {...( e.quantite > e.quantiteEnStock && {error:true,helperText:`quantité en stock est ${e.quantiteEnStock}`})}
-            />
+          />
 
             <Controls.Input
               id={e.id+'prixVente'}
