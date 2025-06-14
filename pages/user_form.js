@@ -33,7 +33,7 @@ const UserForm = (props) => {
     username: "",
     password: "",
     name: "",
-    active: first ? true : false,
+    active: true,
   } : user
 
   const [formValues, setFormValues] = useState(defaultValues);

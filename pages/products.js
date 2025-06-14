@@ -37,6 +37,12 @@ const headCellsOpperation = [
       label: 'Quantité en stock',
     },
     {
+      id: 'uniteEnStock',
+      numeric: false,
+      disablePadding: false,
+      label: 'Unités en stock',
+    },
+    {
       id: 'prixAchat',
       numeric: false,
       disablePadding: false,
@@ -125,6 +131,7 @@ const Products = () => {
   const [listSelected, setListSelected] = React.useState([]);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [productSelected, setProductSelected] = React.useState(null);
+  const [prodUnite, setProdUnit] = React.useState(null);
 
   const axios = useAxios();
   const handleChange = (event, newValue) => {
@@ -223,6 +230,7 @@ const Products = () => {
     } else {
       setListSelected([])
       setProductSelected(null)
+      setProdUnit(null)
       setOpen(false);
     }
   };
@@ -244,6 +252,7 @@ const Products = () => {
 
   const push = (e) =>{
     setProductSelected(null)
+    setProdUnit(null)
     setLoading(true)
     axios.get(`products/all?nom=${getBy}&pageNo=${pageNumber}&pageSize=${pageSize}`).then(
       res => {
@@ -352,9 +361,20 @@ const Products = () => {
   
   const handleClick = (event, row) => {
     // console.log("select => ", phone);
-     if(listSelected.length == 0)
-     setProductSelected(row);
-     else setProductSelected(null);
+     if(listSelected.length == 0){
+      setProductSelected(row);
+      axios.get(`units/byproduct/${row.id}`).then(
+        (res) => { 
+          if(res.data)
+          setProdUnit(res.data)
+        },
+        (err) => {console.log(err)},
+      )
+     }
+     else{
+      setProductSelected(null);
+      setProdUnit(null)
+     } 
      //let obj = {id : id, nom: nom}
      let index = listSelected.map(e => e.id).indexOf(row.id)
      if(index === -1){
@@ -441,6 +461,8 @@ const Products = () => {
                     title={"Ajouter/Modifier un produit"}
                     push={push}
                     update={push}
+                    ProdUnite={prodUnite}
+                    handleClose={handleClose}
                     showSuccessToast={showSuccessToast}
                     showFailedToast={showFailedToast}
                 /> 
@@ -528,6 +550,7 @@ const Products = () => {
                       </TableCell>
                       <TableCell align="left">{row.nom}</TableCell>
                       <TableCell align="left">{row.quantiteEnStock}</TableCell>
+                      <TableCell align="left">{row.uniteEnStock}</TableCell>
                       <TableCell align="left">{pounds.format(row.prixAchat)} CFA</TableCell>
                       <TableCell align="left">{pounds.format(row.prixVente)} CFA</TableCell>
                       <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
@@ -646,6 +669,7 @@ const Products = () => {
                       </TableCell>
                       <TableCell align="left">{row.nom}</TableCell>
                       <TableCell align="left">{row.quantiteEnStock}</TableCell>
+                      <TableCell align="left">{row.uniteEnStock}</TableCell>
                       <TableCell align="left">{pounds.format(row.prixAchat)} </TableCell>
                       <TableCell align="left">{pounds.format(row.prixVente)} </TableCell>
                       <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>

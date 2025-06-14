@@ -234,9 +234,11 @@ const Login = () =>{
             <Box style={{fontSize:'20px', color:'red'}} color="danger"> Authentification invalide </Box>
           </Stack>
           }
+          {nouser &&
           <Stack spacing={2} direction="row" style={{marginTop:10}}>
             <Button style={{fontSize:'20px'}} color="primary" onClick={handleOpenModal} > Inscription </Button>
           </Stack>
+          }
         </BaseCard>
       </Grid>
     </form>

@@ -3,7 +3,8 @@ import {
   Button,
   Grid,
   Stack,
-  CircularProgress
+  CircularProgress,
+  Typography
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import { Form } from "../src/components/Form";
@@ -16,25 +17,29 @@ import { useRouter } from "next/router";
 
 const Product = (props) => {
   const {showSuccessToast,showFailedToast, product, 
-    title, push,update } = props;
+    title, push,update, ProdUnite, handleClose } = props;
 
   const { authTokens } = useContext(AuthContext);
   const axios = useAxios();
   const router = useRouter()
   const { logoutUser } = useContext(AuthContext);
 
-  const defaultValues = !product ? {
+  var defaultValues = !product ? {
     nom: "",
     quantiteEnStock: 0,
     prixAchat: 0.00,
     prixVente: 0.00,
     dateCreation: "",
-    description: ""
-  } : product;
+    description: "",
+    uniteEnStock:0,
+    quantite2: 0,
+    prixVente2: 0.00
+
+  } : ProdUnite ? {...product, quantite2:ProdUnite.quantite, prixVente2:ProdUnite.prixVente} : product;
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
-
+  const [withunite, setWithUnit] = React.useState(true);
 
   const validate = (fieldValues = values) => {
     let temp = { ...errors };
@@ -42,9 +47,15 @@ const Product = (props) => {
       temp.prixAchat = (fieldValues.prixAchat && fieldValues.prixAchat != 0.00) ? "" : "prix d'achat est requis";
     if ("prixVente" in fieldValues)
       temp.prixVente = (fieldValues.prixVente && fieldValues.prixVente != 0.00) ? "" : "prix de vente est requis";
+    if ("quantiteEnStock" in fieldValues)
+      temp.quantiteEnStock = (fieldValues.quantiteEnStock) ? "" : "la quantité est requise";
     if ("nom" in fieldValues)
       temp.nom = (fieldValues.nom && fieldValues.nom != "") ? "" : "le nom du produit est requis";
-    
+    if ("prixVente2" in fieldValues)
+      temp.prixVente2 = ((fieldValues.prixVente2 && parseInt(fieldValues.prixVente2) && parseInt(fieldValues.prixVente2) != 0) || !withunite)? "" : "prix d'unité est requis";
+    if ("quantite2" in fieldValues)
+      temp.quantite2 = ((fieldValues.quantite2 && parseInt(fieldValues.quantite2) && parseInt(fieldValues.quantite2) != 0) || !withunite)? "" : "le nombre est requis";
+
     /* if ("commission" in fieldValues)
       temp.commission = fieldValues.commission ? "" : "Commission est requise "; */
    setErrors({
@@ -90,8 +101,23 @@ const Product = (props) => {
     if (validate()) {
       setLoading(true)
       //console.log(values);
-      var prod = { ...values, dateCreation : product === null ? formatDate(now) : product.dateCreation , 
-        prixAchat: parseFloat(values.prixAchat), prixVente: parseFloat(values.prixVente)};
+      var prod = {
+        id: product ? product.id : null,
+        dateCreation : product === null ? formatDate(now) : product.dateCreation , 
+        uniteEnStock : product === null ? values.uniteEnStock : product.uniteEnStock ? product.uniteEnStock : 0, 
+        prixAchat: parseFloat(values.prixAchat), 
+        prixVente: parseFloat(values.prixVente),
+        description: values.description,
+        quantiteEnStock: values.quantiteEnStock,
+        nom: values.nom
+      };
+      var unit = withunite ? { 
+        productId : product === null ? null : product.id , 
+        quantite: parseInt(values.quantite2), 
+        nom: "U "+values.nom, 
+        prixVente: parseFloat(values.prixVente2)
+      } : null;
+        
       if(product === null){
         console.log(prod);
         axios.post(`products/add`, prod).then(
@@ -100,6 +126,11 @@ const Product = (props) => {
             if(res.data){
               resetForm();
               showSuccessToast() 
+              if(withunite)
+              axios.post(`units/add`, {...unit, productId: res.data.id}).then(
+                (res) => {console.log(res.data)},
+                (err) => {console.log(err)},
+              )
               push(res.data)
             }else{
               showFailedToast()
@@ -117,11 +148,23 @@ const Product = (props) => {
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
-              resetForm();
               showFailedToast();
             }else{
               update(res.data)
               showSuccessToast()
+              handleClose();
+              if(withunite){
+                if(ProdUnite)
+                  axios.put(`units/${ProdUnite.id}`, {...unit, productId: res.data.id, id: ProdUnite.id}).then(
+                    (res) => {console.log(res.data)},
+                    (err) => {console.log(err)},
+                  )
+                else           
+                  axios.post(`units/add`, {...unit, productId: res.data.id}).then(
+                    (res) => {console.log(res.data)},
+                    (err) => {console.log(err)},
+                  )
+              }
             }
           },
           (error) => {
@@ -138,19 +181,21 @@ const Product = (props) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Grid item xs={12} lg={12}  alignItems="center" justify="center">
         <BaseCard title={title}>
           <Stack style={styles.stack} spacing={2} direction="column">
+          <Stack style={styles.stack} spacing={2} direction="row">
             <Controls.Input
+              style={{width:'50%'}}
               id="nom-input"
               name="nom"
-              label="Label"
+              label="Nom de produit"
               type="text"
               value={values.nom}
               onChange={handleInputChange}
               error={errors.nom}
             />
             <Controls.Input
+              style={{width:'50%'}}
               id="quantiteEnStock-input"
               name="quantiteEnStock"
               label="Quantité En Stock"
@@ -159,7 +204,10 @@ const Product = (props) => {
               onChange={handleInputChange}
               error={errors.quantiteEnStock}
             />
+          </Stack>
+          <Stack style={styles.stack} spacing={2} direction="row">
            <Controls.Input
+              style={{width:'50%'}}
               id="prixAchat-input"
               name="prixAchat"
               label="Prix d'achat"
@@ -169,6 +217,7 @@ const Product = (props) => {
               error={errors.prixAchat}
             />
             <Controls.Input
+              style={{width:'50%'}}
               id="prixVente-input"
               name="prixVente"
               label="Prix de vente"
@@ -177,6 +226,51 @@ const Product = (props) => {
               onChange={handleInputChange}
               error={errors.prixVente}
             />
+
+            </Stack>
+
+            <Controls.Checkbox
+              id="withunite-input"
+              name="unite"
+              label="Avec unité"
+              value={withunite}
+              onChange={() => setWithUnit(!withunite)}
+            />
+            {withunite &&
+            <Typography
+                color="#837B7B"
+                sx={{
+                fontWeight: "bold",
+                fontStyle:'initial'
+                }}
+            >
+                Uninté de produit
+            </Typography>
+            }
+            {withunite && 
+            <Stack style={styles.stack} spacing={2} direction="row">
+            <Controls.Input
+              style={{width:'50%'}}
+              id="quantite2-input"
+              name="quantite2"
+              label="Nombre"
+              type="number"
+              value={values.quantite2}
+              onChange={handleInputChange}
+              error={errors.quantite2}
+            />
+            <Controls.Input
+              style={{width:'50%'}}
+              id="prixVente2-input"
+              name="prixVente2"
+              label="Prix d'unité"
+              type="number"
+              value={values.prixVente2}
+              onChange={handleInputChange}
+              error={errors.prixVente2}
+            />
+            </Stack>
+            }
             <Controls.TextArea
               id="description-input"
               name="description"
@@ -187,7 +281,6 @@ const Product = (props) => {
             />
           </Stack>
           <br />
-          <Stack>
           <Button
             type="submit"
             style={{ fontSize: "20px" }}
@@ -211,10 +304,8 @@ const Product = (props) => {
             />
             )}
           </Button>
-          </Stack>
 
         </BaseCard>
-      </Grid>
     </form>
   );
 };

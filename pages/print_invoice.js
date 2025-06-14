@@ -11,7 +11,7 @@ import {
 import { Button } from "@mui/material";
 
   export default function Invoice2(props) {
-    const {  tableData, paymentType, typeId, client, paidAmount, invoiceAmount } = props;
+    const {  tableData, tableData2, paymentType, typeId, client, paidAmount, invoiceAmount } = props;
 
     const formatDate = (date) => {
         if(date){
@@ -49,12 +49,11 @@ import { Button } from "@mui/material";
           <View style={styles.header}>
             <View>
               <Text style={[styles.title, styles.textBold]}>FACTURE</Text>
-              <Text>Brazzaville le {formatDate(now)}</Text>
+              <Text>Bétou le {formatDate(now)}</Text>
             </View>
             <View style={styles.spaceY}>
-              <Text style={styles.textBold}>ETS HN SARLU </Text>
-              <Text>17. rue Mfoa / Poto-poto</Text>
-              <Text>Brazzaville-Congo</Text>
+              <Text style={styles.textBold}>ETS HN</Text>
+              <Text>Bétou-Congo</Text>
               <Text>Tél : (+242) 06 503 40 50 / 05 588 19 18</Text>
               <Text>etshn@gmail.com</Text>
             </View>
@@ -78,6 +77,14 @@ import { Button } from "@mui/material";
               <TR key={index}>
                 <TD style={styles.td}>{item.nom}</TD>
                 <TD style={styles.td}>{item.quantite}</TD>
+                <TD style={styles.td}>{pounds.format(item.prixVente)} CFA</TD>
+                <TD style={styles.td}>{pounds.format(item.prixTotal)} CFA</TD>
+              </TR>
+            ))}
+            {tableData2.map((item, index) => (
+              <TR key={index}>
+                <TD style={styles.td}>{item.nom}</TD>
+                <TD style={styles.td}>{item.quantityCommand}</TD>
                 <TD style={styles.td}>{pounds.format(item.prixVente)} CFA</TD>
                 <TD style={styles.td}>{pounds.format(item.prixTotal)} CFA</TD>
               </TR>

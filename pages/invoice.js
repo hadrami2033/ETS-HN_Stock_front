@@ -12,6 +12,8 @@ import {
   FormControl,
   TableRow,
   TableCell,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import Controls from "../src/components/controls/Controls";
@@ -21,6 +23,7 @@ import useAxios from "../src/utils/useAxios";
 import { useRouter } from "next/router";
 import EnhancedTableHead from "../src/components/Table/TableHeader";
 import Invoice2 from "./print_invoice";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
 const headCells = [
@@ -64,6 +67,8 @@ const Invoice = (props) => {
   ];
   
   const [loading, setLoading] = React.useState(false);
+  const [loading2, setLoading2] = React.useState(false);
+  const [loading3, setLoading3] = React.useState(false);
   const [orders, setOrders] = React.useState([]);
   const [step, setStep] = React.useState(1);
   const [error, setError] = React.useState(null);
@@ -72,6 +77,7 @@ const Invoice = (props) => {
   const [cachier, setCachier] = React.useState(0);
   const [client, setClient] = React.useState('');
   const [clients, setClients] = React.useState([]);
+  const [units, setUnits] = React.useState([]);
   const [praint, setPraint] = React.useState(false);
 
   const [type, setType] = React.useState(
@@ -147,6 +153,67 @@ const Invoice = (props) => {
     console.log(value);
   }
 
+  const openPaquet = (e, index) => {
+    setLoading2(true)
+    let temp2 = orders;
+    let temp = units
+    axios.get(`units/byproduct/${e.id}`).then(
+      (res) => { 
+        if(res.data){
+          const exist = units.filter(e => e.id === res.data.id);
+          if(exist.length == 0){
+            temp.push({...res.data, quantityCommand: 1, dispoQuantity: res.data.quantite, prixTotal: res.data.prixVente, prodQuantity : (e.quantiteEnStock-1)});            
+            setLoading3(true)
+            const obj = {...e, uniteEnStock: res.data.quantite, quantiteEnStock: e.quantiteEnStock-1, hasDetail: true}
+            temp2[index] = obj;
+        
+            setOrders(temp2); 
+          }
+        }
+      },
+      (err) => {console.log(err)},
+    ).then(() => {
+      setUnits(temp)
+      setLoading2(false) 
+      setLoading3(false)
+    })
+  }
+  const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  const deleteOrder = (index) => {
+    orders.splice(index, 1);
+    setLoading3(true)
+    sleep(1 / 90000000).then(() => {
+      setLoading3(false)
+    })
+  }
+
+  const addDetail = (e, dispoQuantity, index) => {
+    setLoading2(true)
+    let temp = units
+    let temp2 = orders
+    axios.get(`units/byproduct/${e.id}`).then(
+      (res) => { 
+        if(res.data){
+          const exist = units.filter(e => e.id === res.data.id);
+          if(exist.length == 0){ 
+            temp.push({...res.data, quantityCommand: 1, dispoQuantity: dispoQuantity, prixTotal: res.data.prixVente});
+            setLoading3(true)
+            const obj = {...e, hasDetail: true}
+            temp2[index] = obj;
+            setOrders(temp2);
+          }
+        }
+      },
+      (err) => {console.log(err)},
+    ).then(() => {
+      setUnits(temp)
+      setLoading2(false) 
+      setLoading3(false) 
+    })
+  }
+
   const onChangeQuantity = (e, el, index) => {
     const { value } = e.target
     let temp = orders;
@@ -156,20 +223,44 @@ const Invoice = (props) => {
     setOrders(temp);
   }
 
+  const onChangeQuantity2 = (e, el, index) => {
+    const { value } = e.target
+    let temp = units;
+    const obj = {...el, quantityCommand: value, prixTotal: el.prixVente*value}
+    temp[index] = obj;
+
+    setUnits(temp);
+  }
+
   const suivante = (stp) => {
     setStep(stp);
     var sumamount = orders ? orders.reduce((accumulator, e) => {
       return accumulator + e.prixTotal
     },0) : 0; 
+    var sumamount2 = units ? units.reduce((accumulator, e) => {
+      return accumulator + e.prixTotal
+    },0) : 0;
     orders.map((e) => {
       if(e.quantite > e.quantiteEnStock || e.prixTotal==0){
         setStep(1); 
         setError("error")
       }
     })
-    setInvoiceAmount(sumamount);
+    units.map((e) => {
+      if(e.quantityCommand > e.dispoQuantity || e.prixTotal==0){
+        setStep(1); 
+        setError("error")
+      }
+    })
+    setInvoiceAmount(sumamount+sumamount2);
   }
 
+  const setUniteEnStock = (prod) => {
+    let unit = units.filter(e => e.productId == prod.id)
+    if(unit.length == 0)
+      return prod.uniteEnStock
+    else return (prod.uniteEnStock - parseInt(unit[0].quantityCommand))
+  }
   const addMouvmentsAndUpdateProducts = (now) =>{
     orders.map((e) => {
       let mvmnt = {
@@ -188,7 +279,8 @@ const Invoice = (props) => {
         prixAchat: e.prixAchat,
         prixVente: e.prixVente,
         dateCreation: e.dateCreation,
-        description: e.description
+        description: e.description,
+        uniteEnStock: setUniteEnStock(e)
       }
       axios.post(`mouvments/add`, mvmnt).then(
         (res) => {
@@ -212,6 +304,52 @@ const Invoice = (props) => {
           } 
         )
       })
+    })
+
+    units.map((e) => {
+      let mvmnt = {
+        quantity: e.quantityCommand,
+        amount: e.prixTotal,
+        dateCreation: formatDate(now),
+        userId: localStorage.getItem("userId") ? localStorage.getItem("userId") : 1,
+        unitId: e.id,
+        typeId: 2
+        //clientId: client.id ? client.id : null
+      }
+      const inorders = orders.filter(e => e.id === e.productId);
+      if(inorders.length == 0){
+        axios.get(`products/${e.productId}`).then(
+          (res) => {
+            axios.put(`products/${e.productId}`, {...res.data, quantiteEnStock : e.prodQuantity ? e.prodQuantity : res.data.quantiteEnStock, uniteEnStock: (e.dispoQuantity-e.quantityCommand)}).then(
+              (res) => {
+                console.log("update prod without order => " ,res);
+              },
+              (error) => {
+                console.log(error);
+                //showFailedToast()
+              } 
+            )
+          },
+          (error) => {
+            console.log(error);
+            //showFailedToast()
+          } 
+        )
+
+
+      }
+      axios.post(`mouvments/add`, mvmnt).then(
+        (res) => {
+          console.log("added => " ,res);
+          if(res.data){
+            console.log(res.data);
+          }
+        },
+        (error) => {
+          console.log(error);
+          //showFailedToast()
+        } 
+      )
     })
   }
 
@@ -293,7 +431,21 @@ const Invoice = (props) => {
       <Grid item xs={12} lg={12}  alignItems="center" justify="center">
       {step == 1 &&
         <BaseCard title={title}>
-          {orders.map((e, index) => {
+          {loading3 ? (
+            <CircularProgress
+              size={24}
+              sx={{
+                color: 'primary',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginTop: '-12px',
+                marginLeft: '-12px',
+              }}
+            />
+            )
+          :
+          orders.map((e, index) => {
           return(
           <Stack key={e.id} style={styles.stack} spacing={2} direction="row">
             <Controls.Input
@@ -313,22 +465,113 @@ const Invoice = (props) => {
               disabled={true}
             />
 
-          <TextField
-              fullWidth={true}
-              variant="standard"
-              label="Quantité demmandée"
-              name="quantite"
-              defaultValue={e.quantite}
-              type="number"
-              id={e.id+'quantite-commande'}
-              onChange={(event) => onChangeQuantity(event, e, index)}
-              {...( e.quantite > e.quantiteEnStock && {error:true,helperText:`quantité en stock est ${e.quantiteEnStock}`})}
-          />
+            <TextField
+                fullWidth={true}
+                variant="standard"
+                label="Quantité demmandée"
+                name="quantite"
+                defaultValue={e.quantite}
+                type="number"
+                id={e.id+'quantite-commande'}
+                onChange={(event) => onChangeQuantity(event, e, index)}
+                {...( e.quantite > e.quantiteEnStock && {error:true,helperText:`quantité en stock est ${e.quantiteEnStock}`})}
+            />
 
             <Controls.Input
               id={e.id+'prixVente'}
               name="prixVente"
               label="Prix unitaire"
+              type="number"
+              value={e.prixVente}
+              disabled={true}
+            />
+            <Controls.Input
+              id={e.id+'uniteEnStock'}
+              name="uniteEnStock"
+              label="Unité en stock"
+              type="number"
+              value={e.uniteEnStock}
+              disabled={true}
+            />
+            {e.hasDetail ?
+            <Tooltip onClick={() => deleteOrder(index)} title="Supprimer">
+              <IconButton>
+                <DeleteIcon color='danger' fontSize='medium'/>
+              </IconButton>
+            </Tooltip>
+            : e.uniteEnStock > 0 ?
+            <Button onClick={() => addDetail(e, e.uniteEnStock, index)} variant="contained" color="primary" style={{fontSize:"12"}}>
+              Detail
+            </Button>
+            :
+            <Button onClick={() => openPaquet(e, index)} variant="contained" color="primary" style={{fontSize:"12"}}>
+              Ouvrir
+            </Button>
+            }
+          </Stack>
+          )
+          }
+          )}
+          
+          {loading2 ? (
+            <CircularProgress
+              size={24}
+              sx={{
+                color: 'primary',
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                marginTop: '-12px',
+                marginLeft: '-12px',
+              }}
+            />
+            )
+          :
+          units.map((e, index) => {
+          return(
+          <Stack key={e.id} style={styles.stack} spacing={2} direction="row">
+            <Controls.Input
+              id={e.id+'nom'}
+              name="nom"
+              label="Unité de produit"
+              type="text"
+              disabled={true}
+              value={e.nom}
+            />
+            <Controls.Input
+              id={e.id+'quantite'}
+              name="quantite"
+              label="Nombre d'unité"
+              type="number"
+              value={e.quantite}
+              disabled={true}
+            />
+
+            <Controls.Input
+              id={e.id+'dispoQuantity'}
+              name="dispoQuantity"
+              label="Quantité disponible"
+              type="number"
+              value={e.dispoQuantity}
+              disabled={true}
+            />
+
+            <TextField
+                fullWidth={true}
+                variant="standard"
+                label="Quantité demmandée"
+                name="quantite"
+                defaultValue={e.quantityCommand}
+                type="number"
+                id={e.id+'quantite-commande'}
+                onChange={(event) => onChangeQuantity2(event, e, index)}
+                {...( e.quantityCommand > e.dispoQuantity && {error:true,helperText:`quantité disponible est ${e.dispoQuantity}`})}
+            />
+
+            <Controls.Input
+              id={e.id+'prixVente'}
+              name="prixVente"
+              label="Prix d'unité"
               type="number"
               value={e.prixVente}
               disabled={true}
@@ -413,6 +656,19 @@ const Invoice = (props) => {
           >
           <TableCell align="left">{e.nom }</TableCell>
           <TableCell align="left">{e.quantite}</TableCell>
+          <TableCell align="left">{pounds.format(e.prixVente)} CFA</TableCell>
+          <TableCell align="left">{pounds.format(e.prixTotal)} CFA</TableCell>
+        </TableRow>
+        )})
+        }
+       {units.map((e, index) => {
+        return(
+        <TableRow
+              key={e.id}
+              style={{display:"flex", justifyContent:"space-between"}}
+          >
+          <TableCell align="left">{e.nom }</TableCell>
+          <TableCell align="left">{e.quantityCommand}</TableCell>
           <TableCell align="left">{pounds.format(e.prixVente)} CFA</TableCell>
           <TableCell align="left">{pounds.format(e.prixTotal)} CFA</TableCell>
         </TableRow>
@@ -586,6 +842,7 @@ const Invoice = (props) => {
           </Button>
             <Invoice2
               tableData={orders}
+              tableData2={units}
               paymentType = {type.name}
               typeId = {type.id}
               client = {client}

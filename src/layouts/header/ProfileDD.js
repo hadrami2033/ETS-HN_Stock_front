@@ -7,7 +7,6 @@ import {
   ListItemButton,
   List,
   Button,
-  Divider,
   IconButton,
   Dialog,
   DialogContent,
@@ -17,7 +16,6 @@ import {
 import { Close } from "@material-ui/icons";
 import UserForm from "../../../pages/user_form";
 import { useRouter } from "next/router";
-import jwt_decode from "jwt-decode";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import { Logout } from "@mui/icons-material";
@@ -150,22 +148,22 @@ const ProfileDD = () => {
         }}
       >
       <Box>
-        {/*           <Box p={2} pt={0}>
+        <Box p={2} pt={0}>
             <List
               component="nav"
               aria-label="secondary mailbox folder"
               onClick={handleClose4}
             >
               <ListItemButton onClick={handleOpenModal} >
-                <Button fullWidth variant="contained" color="grey" style={{fontSize:"22px"}}>
+                <Button fullWidth variant="contained" color="primary" >
                   Ajouter un utilisateur
                 </Button>
               </ListItemButton>
             </List>
-          </Box> */}
+          </Box> 
           {/* <Divider /> */}
           <Box p={2}>
-              <Button onClick={logoutUser} fullWidth variant="contained" color="secondary" style={{fontSize:"20px"}}>
+              <Button onClick={logoutUser} fullWidth variant="contained" color="danger" style={{color:'white'}}>
                  <Logout fontSize="small" style={{marginInlineEnd : '5px'}} ></Logout>   Déconnecter
               </Button>
           </Box>
