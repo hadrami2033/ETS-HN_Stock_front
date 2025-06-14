@@ -35,7 +35,7 @@ const Product = (props) => {
     quantite2: 0,
     prixVente2: 0.00
 
-  } : ProdUnite ? {...product, quantite2:ProdUnite.quantite, prixVente2:ProdUnite.prixVente} : product;
+  } : ProdUnite ? {...product, quantite2:ProdUnite.quantite, prixVente2:ProdUnite.prixVente} : {...product, quantite2:null, prixVente2:null};
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
@@ -66,7 +66,8 @@ const Product = (props) => {
   };
 
   useEffect(() => {
-    console.log("product : ", product);
+    console.log("ProdUnite : ", ProdUnite);
+    console.log("defaultValues : ", defaultValues);
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
