@@ -361,7 +361,7 @@ const Byinterval = () => {
                                     >
                                         <TableCell align="left"></TableCell>
                                     
-                                        <TableCell align="left">{row.product && row.product.nom}</TableCell>
+                                        <TableCell align="left">{row.product ? row.product.nom : row.unit && row.unit.nom}</TableCell>
                                         <TableCell align="left">{row.type && row.type.label}</TableCell>
                                         <TableCell align="left">{row.quantity}</TableCell>
                                         <TableCell align="left">{pounds.format(row.amount)} CFA</TableCell>
