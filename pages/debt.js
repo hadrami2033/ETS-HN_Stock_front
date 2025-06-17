@@ -87,12 +87,40 @@ const Debt = (props) => {
     }else return null
   }
 
+  const formatDate2 = (date) => {
+    if(date){
+      var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear(),
+          hour = '' + d.getHours(),
+          min = '' + d.getMinutes();
+
+      if (month.length < 2) 
+          month = '0' + month;
+      if (day.length < 2) 
+          day = '0' + day;
+      if (hour.length < 2) 
+          hour = '0' + hour;
+      if (min.length < 2) 
+          min = '0' + min;
+  
+      return [year, month, day ].join('-')+ "  " + [hour, min].join(':');
+      
+    }else return null
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault();
     let now = new Date()
     let payed = parseFloat(values.newPayed);
     let cachierUpdate = {
       solde: (parseFloat(cachier)+payed)
+    }
+    let cachierMouvment = {
+      amount: payed,
+      dateCreation: formatDate(now),
+      description : "paiement " + title + " le " +formatDate2(now)
     }
     console.log("cachierUpdate" ,cachierUpdate);
     if (validate()) {
@@ -129,6 +157,16 @@ const Debt = (props) => {
                 console.log(error);
                 //showFailedToast()
               } 
+            ).then(() => 
+              axios.post(`cachiermouvments/add`, cachierMouvment).then(
+                (res) => {
+                  console.log("cachiermouvments added => " ,res.data);
+                },
+                (error) => {
+                  console.log(error);
+                  //showFailedToast()
+                } 
+              )
             )
         }); 
       }else{
@@ -159,6 +197,16 @@ const Debt = (props) => {
                 console.log(error);
                 //showFailedToast()
               } 
+            ).then(() => 
+              axios.post(`cachiermouvments/add`, cachierMouvment).then(
+                (res) => {
+                  console.log("cachiermouvments added => " ,res.data);
+                },
+                (error) => {
+                  console.log(error);
+                  //showFailedToast()
+                } 
+              )
             )
         });
       }

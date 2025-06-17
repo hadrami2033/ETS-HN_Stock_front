@@ -8,10 +8,10 @@ import {
   } from "@react-pdf/renderer";
   import { styles } from "../styles/invoiceStyle.js";
   import { Table, TD, TH, TR } from "@ag-media/react-pdf-table";
-import { Button } from "@mui/material";
+import { Button, Stack } from "@mui/material";
 
   export default function Invoice2(props) {
-    const {  tableData, tableData2, paymentType, typeId, client, paidAmount, invoiceAmount } = props;
+    const { closePrint=null, tableData=[], tableData2=[], tableData3=[], paymentType, typeId, client, paidAmount, invoiceAmount, date = null } = props;
 
     const formatDate = (date) => {
         if(date){
@@ -49,20 +49,28 @@ import { Button } from "@mui/material";
           <View style={styles.header}>
             <View>
               <Text style={[styles.title, styles.textBold]}>FACTURE</Text>
-              <Text>Bétou le {formatDate(now)}</Text>
+              <Text style={styles.textBold}>ETS HN</Text>
+              <Text style={{marginTop:5}}>ALIMENTATION GÉNÉRALE</Text>
+              {/* <Text>MARCHANDISES & PRODUITS DE BEAUTÉ & NÉCESSITES DE CUISINE</Text> */}
+              <Text style={{marginTop:5}} >Bétou le {date ? formatDate(date) : formatDate(now)}</Text>
             </View>
             <View style={styles.spaceY}>
-              <Text style={styles.textBold}>ETS HN</Text>
               <Text>Bétou-Congo</Text>
               <Text>Tél : (+242) 06 503 40 50 / 05 588 19 18</Text>
               <Text>etshn@gmail.com</Text>
             </View>
           </View>
   
-        {typeId != 1 &&
+        {(typeId && typeId != 1) &&
           <View style={styles.spaceY}>
             <Text style={[styles.billTo, styles.textBold]}>Client:</Text>
-            <Text>{client.name}</Text>
+            <Text>{client.name ? client.name : client}</Text>
+          </View>
+        }
+        {(client && !client.name) &&
+          <View style={styles.spaceY}>
+            <Text style={[styles.billTo, styles.textBold]}>Client:</Text>
+            <Text>{client}</Text>
           </View>
         }
           {/* Render the table */}
@@ -87,6 +95,14 @@ import { Button } from "@mui/material";
                 <TD style={styles.td}>{item.quantityCommand}</TD>
                 <TD style={styles.td}>{pounds.format(item.prixVente)} CFA</TD>
                 <TD style={styles.td}>{pounds.format(item.prixTotal)} CFA</TD>
+              </TR>
+            ))}
+            {tableData3.map((item, index) => (
+              <TR key={index}>
+                <TD style={styles.td}>{item.product ? item.product.nom : item.unit ? item.unit.nom : null}</TD>
+                <TD style={styles.td}>{item.quantity}</TD>
+                <TD style={styles.td}>{ item.product ? pounds.format(item.product.prixVente) : item.unit ? pounds.format(item.unit.prixVente) : null } CFA</TD>
+                <TD style={styles.td}>{ item.product ? pounds.format(item.product.prixVente*item.quantity) : item.unit ? pounds.format(item.unit.prixVente*item.quantity) : null } CFA</TD>
               </TR>
             ))}
           </Table>
@@ -127,7 +143,7 @@ import { Button } from "@mui/material";
                      </Text>
                  </View>
                 } */}
-                {typeId === 2 &&
+                {(typeId === 2 || (typeId == null && paidAmount)) &&
                  <View
                      style={{
                        flexDirection: "row",
@@ -171,7 +187,7 @@ import { Button } from "@mui/material";
           </PDFViewer>
         </div>
         <div className="mt-6 flex justify-center">
-          <PDFDownloadLink document={<InvoicePDF />} fileName={`facture le ${formatDate(now)}.pdf`}>
+          <PDFDownloadLink document={<InvoicePDF />} fileName={`facture le ${date ? formatDate(date) : formatDate(now)}.pdf`}>
             {/* <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300">
               Imprimer la facture
             </button> */}
@@ -185,6 +201,20 @@ import { Button } from "@mui/material";
               
             </Button>
           </PDFDownloadLink>
+          {closePrint &&
+            <Stack style={{width:"100%", display: "flex",  justifyContent: "center", marginTop:"15px"  }}>
+              <Button
+                      //type="submit"
+                      style={{ fontSize: "20px", width: "30%" }}
+                      variant="contained"
+                      mt={4}
+                      //fullWidth
+                      onClick={() => closePrint()}
+                    >
+                    Retourner
+              </Button>
+            </Stack>
+          }
         </div>
       </div>
     );

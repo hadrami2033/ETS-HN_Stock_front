@@ -137,6 +137,29 @@ const Invoice = (props) => {
     }else return null
   }
 
+  const formatDate2 = (date) => {
+    if(date){
+      var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear(),
+          hour = '' + d.getHours(),
+          min = '' + d.getMinutes();
+
+      if (month.length < 2) 
+          month = '0' + month;
+      if (day.length < 2) 
+          day = '0' + day;
+      if (hour.length < 2) 
+          hour = '0' + hour;
+      if (min.length < 2) 
+          min = '0' + min;
+  
+      return [year, month, day ].join('-')+ "  " + [hour, min].join(':');
+      
+    }else return null
+  }
+
   const selectClient = (event) => {
     setClient(event.target.value)
   };
@@ -261,7 +284,7 @@ const Invoice = (props) => {
       return prod.uniteEnStock
     else return (prod.uniteEnStock - parseInt(unit[0].quantityCommand))
   }
-  const addMouvmentsAndUpdateProducts = (now) =>{
+  const addMouvmentsAndUpdateProducts = (now, invoiceId) =>{
     orders.map((e) => {
       let mvmnt = {
         quantity: e.quantite,
@@ -269,8 +292,8 @@ const Invoice = (props) => {
         dateCreation: formatDate(now),
         userId: localStorage.getItem("userId") ? localStorage.getItem("userId") : 1,
         productId: e.id,
-        typeId: 2
-        //clientId: client.id ? client.id : null
+        typeId: 2,
+        invoiceId: invoiceId
       }
       let product = {
         id: e.id,
@@ -313,8 +336,8 @@ const Invoice = (props) => {
         dateCreation: formatDate(now),
         userId: localStorage.getItem("userId") ? localStorage.getItem("userId") : 1,
         unitId: e.id,
-        typeId: 2
-        //clientId: client.id ? client.id : null
+        typeId: 2,
+        invoiceId: invoiceId
       }
       const inorders = orders.filter(e => e.id === e.productId);
       if(inorders.length == 0){
@@ -359,11 +382,25 @@ const Invoice = (props) => {
       solde: (type.id !== 1) ? (parseFloat(cachier)+parseFloat(paidAmount)) 
              : (parseFloat(cachier)+parseFloat(invoiceAmount))
     }
+
+    let invoice = {
+      amount: invoiceAmount,
+      dateCreation: formatDate(now),
+      client: client.id ? client.name : null,
+      amountPartiel : (client.id && paidAmount>0) ? paidAmount : null,
+      typePaiement : type.name
+    }
+
+    let cachierMouvment = {
+      amount: invoiceAmount,
+      dateCreation: formatDate(now),
+      description : "facture le "+formatDate2(now)
+    }
     
     if(type.id !== 1){
       if(client.id){
         setLoading(true)
-        addMouvmentsAndUpdateProducts(now)
+
         let debt = {
           dateCreation: formatDate(now),
           updatedAt: formatDate(now),
@@ -375,19 +412,32 @@ const Invoice = (props) => {
         }
 
         //console.log(debt);
-        
-        axios.post(`debts/add`, debt).then(
+        axios.post(`mouvments/addinvoice`, invoice).then(
           (res) => {
-            console.log("debt added => " ,res);
+            console.log("added => " ,res);
             if(res.data){
               console.log(res.data);
+              addMouvmentsAndUpdateProducts(now, res.data.id)
             }
           },
           (error) => {
             console.log(error);
             //showFailedToast()
           } 
-        ).then(() => {
+        ).then( () =>
+          axios.post(`debts/add`, debt).then(
+            (res) => {
+              console.log("debt added => " ,res);
+              if(res.data){
+                console.log(res.data);
+              }
+            },
+            (error) => {
+              console.log(error);
+              //showFailedToast()
+            } 
+          ))
+        .then(() => {
           setLoading(false)
           setPraint(true)
         })
@@ -402,6 +452,16 @@ const Invoice = (props) => {
               console.log(error);
               //showFailedToast()
             } 
+          ).then(() => 
+            axios.post(`cachiermouvments/add`, {...cachierMouvment, amount: parseFloat(paidAmount)}).then(
+              (res) => {
+                console.log("cachiermouvments added => " ,res.data);
+              },
+              (error) => {
+                console.log(error);
+                //showFailedToast()
+              } 
+            )
           )
       }else{
         console.log("no client selected !");
@@ -410,7 +470,19 @@ const Invoice = (props) => {
     }
     else{
       setLoading(true)
-      addMouvmentsAndUpdateProducts(now)
+      axios.post(`mouvments/addinvoice`, invoice).then(
+        (res) => {
+          console.log("added => " ,res);
+          if(res.data){
+            console.log(res.data);
+            addMouvmentsAndUpdateProducts(now, res.data.id)
+          }
+        },
+        (error) => {
+          console.log(error);
+          //showFailedToast()
+        } 
+      ).then( () =>
       axios.put(`cachier/${1}`, cachierUpdate).then(
         (res) => {
           console.log("cachierUpdate => " ,res.data);
@@ -420,7 +492,19 @@ const Invoice = (props) => {
           console.log(error);
           //showFailedToast()
         } 
-      ).then(() => {
+      )
+      ).then(() => 
+        axios.post(`cachiermouvments/add`, {...cachierMouvment, amount: parseFloat(invoiceAmount)}).then(
+          (res) => {
+            console.log("cachiermouvments added => " ,res.data);
+          },
+          (error) => {
+            console.log(error);
+            //showFailedToast()
+          } 
+        )
+      )
+      .then(() => {
         setLoading(false)
         setPraint(true)
       })

@@ -11,25 +11,18 @@ import { GiWallet } from "react-icons/gi";
 
 
 const Solde = (props) => {
+  const { loading } = props;
+
   const { logoutUser } = useContext(AuthContext);
 
-  const [yearSolde, setYearSolde] = React.useState(0);
-  const [yearWalletSolde, setYearWalletSolde] = React.useState(0);
-  const [yearVersementSolde, setYearVersementSolde] = React.useState(0);
-  const [yearWithdrawalSolde, setYearWithdrawalSolde] = React.useState(0);
-  const [yearWithdrawal2Solde, setYearWithdrawal2Solde] = React.useState(0);
-  const [yearEntreeSolde, setYearEntreeSolde] = React.useState(0);
-  const [entreeType, setEntreeType] = React.useState([]); 
-  const [walletType, setWalletType] = React.useState([]); 
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
   const [openSuccessToast, setOpenSuccessToast] = React.useState(false);
   const [open, setOpen] = React.useState(false);
-  const [openVer2, setOpenVer2] = React.useState(false);
   const [cachier, setCachier] = React.useState(0);
   const [amount, setAmount] = React.useState(0);
+  const [description, setDescription] = React.useState("");
 
   const axios = useAxios();
-  const now_date = new Date();
 
   React.useEffect(() => {
     axios.get(`cachier/1`).then(
@@ -80,8 +73,37 @@ const Solde = (props) => {
     setOpen(false);
   };
 
+    const formatDate = (date) => {
+      if(date){
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+            /* hour = '' + d.getHours(),
+            min = '' + d.getMinutes(); */
+  
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+        /* if (hour.length < 2) 
+            hour = '0' + hour;
+        if (min.length < 2) 
+            min = '0' + min; */
+    
+        return [year, month, day ].join('-'); //+ "  " + [hour, min].join(':')
+        
+      }else return null
+    }
+
   const saveUpdate = () => {
-    if(parseFloat(amount)){
+    let now = new Date()
+    let cachierMouvment = {
+      amount: parseFloat(amount),
+      dateCreation: formatDate(now),
+      description : description
+    }
+    if(parseFloat(amount) && parseFloat(amount) != 0 && description.length > 0){
       let cachierUpdate = {
         solde: cachier+parseFloat(amount)
       }
@@ -94,18 +116,39 @@ const Solde = (props) => {
           console.log(error);
           showFailedToast()
         } 
-      ).then(() => {
+      )
+      .then(() => {
+        axios.post(`cachiermouvments/add`, cachierMouvment).then(
+          (res) => {
+            console.log("cachiermouvments added => " ,res.data);
+          },
+          (error) => {
+            console.log(error);
+            //showFailedToast()
+          } 
+        )
+        .then(() => {
+          loading();
+        })
+      })
+      .then(() => {
         handleClose();
         setAmount(0)
+        setDescription("")
       })
     }else{
       console.log(parseFloat(amount));
     }
   };
 
-  const onChange = (e, el, index) => {
+  const onChange = (e) => {
     const { value } = e.target;
     setAmount(value);
+  }
+
+  const onChangeDescription = (e) => {
+    const { value } = e.target;
+    setDescription(value);
   }
 
   return (
@@ -129,6 +172,17 @@ const Solde = (props) => {
             id={'amount'}
             onChange={(event) => onChange(event)}
         />
+
+          <TextField
+            fullWidth={true}
+            variant="standard"
+            label="Description"
+            name="description"
+            defaultValue={description}
+            type="text"
+            id={'description'}
+            onChange={(event) => onChangeDescription(event)}
+          />
 
         <Button
             //type="submit"

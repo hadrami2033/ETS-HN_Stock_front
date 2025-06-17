@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Typography, Button, Grid, Tooltip, Stack,Snackbar, Box, Tab ,Tabs, CircularProgress, Fab, Paper, Select, MenuItem  } from "@mui/material";
+import { Button, Tooltip, Stack, Box, CircularProgress, Select, MenuItem  } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
@@ -23,6 +23,7 @@ import { alpha } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import { BsCalendar4Range } from "react-icons/bs";
 import Controls from "../src/components/controls/Controls";
+import Invoice2 from "./print_invoice";
 
 
 const headCellsOpperation = [
@@ -55,6 +56,13 @@ const headCellsOpperation = [
       numeric: false,
       disablePadding: false,
       label: 'Date de création',
+    }
+    ,  
+    {
+      id: 'action',
+      numeric: false,
+      disablePadding: false,
+      label: 'La facture',
     }
 ]
 
@@ -93,11 +101,16 @@ const Byinterval = () => {
   const [totalPages, setTotalPages] = React.useState(0);
   const [total, setTotal] = React.useState(0);
   const [data, setData] = React.useState([]); 
+  const [invoiceMouvments, setInvoiceMouvments] = React.useState([]); 
+  const [units, setUnits] = React.useState([]); 
+  const [type, setType] = React.useState(null);
+  const [client, setClient] = React.useState(null);
+  const [paidAmount, setPaidAmount] = React.useState(null);
+  const [invoiceAmount, setInvoiceAmount] = React.useState(null);
+  const [invoiceDate, setInvoiceDate] = React.useState(null);
   const [valid, setValid] = React.useState(false);
   const [openDate, setOpenDate] = React.useState(false)
-  const [commissions, setCommissions] = React.useState(0)
-  const [rets, setRets] = React.useState(0)
-  const [vers, setVers] = React.useState(0)
+  const [print, setPrint] = React.useState(false)
   const [date, setDate] = React.useState([
     {
       startDate: new Date(),
@@ -127,26 +140,11 @@ const Byinterval = () => {
       endDate: formatDate2(new Date())
     }
   )
-  const [selected, setSelected] = React.useState(false);
 
   const axios = useAxios();
   const { logoutUser } = useContext(AuthContext);
 
 
-  const getCommissions = (data) => {
-    var sum = data ? data.reduce((accumulator, e) => {
-        return accumulator+e.commission;
-    },0) : 0;
-    setCommissions(sum);
-  }
-
-  const getRets = (data) => {
-    setRets(data.filter(e => e.type.label === "withdrawal" || e.type.label === "withdrawal2").length);
-  }
-
-  const getVers = (data) => {
-    setVers(data.filter(e => e.type.label === "versement").length);
-  }
 
   useEffect(() => {
     setLoading(true)
@@ -219,9 +217,38 @@ const Byinterval = () => {
 
   const handleOpenDate = () => {
     setOpenDate(true)
-    setSelected(true)
   }
-
+  
+  const printInvoice = (invoiceId) => {
+    axios.get(`mouvments/byinvoice/${invoiceId}`).then(
+      res => {
+      console.log("inv mouvments " ,res.data);
+      setInvoiceMouvments(res.data);
+    },
+    error => {
+      console.log(error)
+    }
+    ).then(() => {
+      axios.get(`mouvments/invoice/${invoiceId}`).then(
+        res => {
+        console.log("invoice ",res.data);
+        setType(res.data.typePaiement)
+        setInvoiceAmount(res.data.amount)
+        setPaidAmount(res.data.amountPartiel)
+        setInvoiceDate(res.data.dateCreation)
+        setClient(res.data.client)
+      },
+      error => {
+        console.log(error)
+      }
+      )
+    }).then(() => {
+      setPrint(true)
+    })
+  }
+  const closePrint = () => {
+    setPrint(false)
+  }
   const validSelect = () => {
     handleCloseDate()
     setInterval({
@@ -276,7 +303,7 @@ const Byinterval = () => {
             </DialogContent>
         </Dialog>
 
-        <Toolbar
+      <Toolbar
             style={{display:"flex", justifyContent: "center", marginBottom:30}}
             sx={{
             pl: { sm: 2 },
@@ -316,13 +343,9 @@ const Byinterval = () => {
             </Stack>
 
       </Toolbar>
-
-
-            <Box sx={{ width: '100%', marginTop:'35px', marginLeft: '15px', whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden'}}>
-
-
-                    <Stack spacing={2} direction="row" mb={2} >
-                      
+      {!print &&
+      <Box sx={{ width: '100%', marginTop:'35px', marginLeft: '15px', whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden'}}>
+                  <Stack spacing={2} direction="row" mb={2} >
                     </Stack>
                     {loading ?
                       <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
@@ -351,8 +374,7 @@ const Byinterval = () => {
                                 txtColor="#DCDCDC"
                             />
                             <TableBody>
-                                {data
-                                .map((row, index) => {
+                                {data.map((row, index) => {
                                     return (
                                     <TableRow
                                         hover
@@ -366,6 +388,11 @@ const Byinterval = () => {
                                         <TableCell align="left">{row.quantity}</TableCell>
                                         <TableCell align="left">{pounds.format(row.amount)} CFA</TableCell>
                                         <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
+                                        <TableCell align="left">
+                                          <Button onClick={() => printInvoice(row.invoiceId)} variant="contained" color="primary" style={{fontSize:"12"}}>
+                                            VOIR
+                                          </Button>
+                                        </TableCell>
 
                                     </TableRow>
                                     );
@@ -426,9 +453,19 @@ const Byinterval = () => {
           }
                     </Box>
                   }
-            </Box>
-
-          
+      </Box>}
+      {print &&
+      <Invoice2
+        tableData3={invoiceMouvments}
+        paymentType = {type}
+        typeId = {null}
+        client = {client}
+        paidAmount = {paidAmount}
+        invoiceAmount = {invoiceAmount}
+        date = {invoiceDate}
+        closePrint = {closePrint}
+      ></Invoice2>
+      }
     </BaseCard>
 
   );
