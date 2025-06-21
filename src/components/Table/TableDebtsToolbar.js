@@ -5,7 +5,7 @@ import {  Fab, Stack, Tooltip, MenuItem, Select,  } from '@mui/material';
 import { Add } from '@mui/icons-material';
 
 const EnhancedTableToolbar = (props) => {
-    const { clients, clientSelected, selectClient, openAdd } = props;
+    const { clients, employes, clientSelected, selectClient, openAdd } = props;
     //console.log(selected);
    
     return (
@@ -37,6 +37,30 @@ const EnhancedTableToolbar = (props) => {
                   }
                   {
                     clients.map(
+                      m => <MenuItem style={{fontSize:'15px', fontWeight:'bold'}} value={m}>{m.name}</MenuItem>
+                    )
+                  }
+              </Select>
+            </Stack>
+            }
+
+          {employes && 
+            <Stack spacing={2} direction="row">
+              <Select
+                id="page-size-select"
+                value={clientSelected}
+                onChange={selectClient}
+                label="pageSize"
+                style={{fontSize:'15px', paddingInline: '10px', borderBottomWidth: 0}}
+                variant ="standard"
+              >
+                  {clientSelected &&
+                    <MenuItem style={{fontSize:'15px', fontWeight:'bold'}} value={clientSelected}>
+                      <em>{clientSelected.name}</em>
+                    </MenuItem>
+                  }
+                  {
+                    employes.map(
                       m => <MenuItem style={{fontSize:'15px', fontWeight:'bold'}} value={m}>{m.name}</MenuItem>
                     )
                   }

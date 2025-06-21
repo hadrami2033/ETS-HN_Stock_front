@@ -38,6 +38,20 @@ const Menuitems = [
       }
     ]
   },
+  {
+    title: "Gestion employés",
+    icon: "users",
+    items: [
+      {
+        title: "Les employés",
+        href: "/employes",
+      },
+      {
+        title: "Prets sur employés",
+        href: "/prets",
+      }
+    ]
+  }
   
 ];
 

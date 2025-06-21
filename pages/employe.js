@@ -14,8 +14,8 @@ import useAxios from "../src/utils/useAxios";
 import { useRouter } from "next/router";
 
 
-const Client = (props) => {
-  const {showSuccessToast,showFailedToast, client, 
+const Employe = (props) => {
+  const {showSuccessToast,showFailedToast, employe, 
     title, push,update } = props;
 
   const { authTokens } = useContext(AuthContext);
@@ -23,10 +23,11 @@ const Client = (props) => {
   const router = useRouter()
   const { logoutUser } = useContext(AuthContext);
 
-  const defaultValues = !client ? {
+  const defaultValues = !employe ? {
     name: "",
+    salair: 0,
     phone: ""
-  } : client;
+  } : employe;
 
   const [formValues, setFormValues] = useState(defaultValues);
   const [loading, setLoading] = React.useState(false);
@@ -38,6 +39,8 @@ const Client = (props) => {
       temp.name = (fieldValues.name && fieldValues.name != "") ? "" : "le nom est requis";
     if ("phone" in fieldValues)
         temp.phone = (fieldValues.phone && fieldValues.phone != "") ? "" : "teléphone est requis";
+    if ("salair" in fieldValues)
+        temp.salair = (fieldValues.salair && fieldValues.salair != 0) ? "" : "salaire d'employé est requis";
     
     /* if ("commission" in fieldValues)
       temp.commission = fieldValues.commission ? "" : "Commission est requise "; */
@@ -49,7 +52,7 @@ const Client = (props) => {
   };
 
   useEffect(() => {
-    console.log("client : ", client);
+    console.log("employe : ", employe);
   }, [])
 
   const { values, setValues, errors, setErrors, handleInputChange, resetForm } = Form(formValues, true, validate);
@@ -84,10 +87,10 @@ const Client = (props) => {
     if (validate()) {
       setLoading(true)
       //console.log(values);
-      var prod = { ...values, dateCreation : client === null ? formatDate(now) : client.dateCreation};
-      if(client === null){
+      var prod = { ...values, dateCreation : employe === null ? formatDate(now) : employe.dateCreation};
+      if(employe === null){
         console.log(prod);
-        axios.post(`clients/add`, prod).then(
+        axios.post(`employes/add`, prod).then(
           (res) => {
             console.log("added => " ,res);
             if(res.data){
@@ -106,7 +109,7 @@ const Client = (props) => {
           setLoading(false)
         }); 
       }else{
-        axios.put(`clients/${values.id}`, prod).then(
+        axios.put(`employes/${values.id}`, prod).then(
           (res) => {
             console.log("updated => ", res);
             if(!res.data){
@@ -152,6 +155,15 @@ const Client = (props) => {
               onChange={handleInputChange}
               error={errors.phone}
             />
+            <Controls.Input
+              id="salair-input"
+              name="salair"
+              label="Salaire"
+              type="number"
+              value={values.salair}
+              onChange={handleInputChange}
+              error={errors.salair}
+            />
           </Stack>
           <br />
           <Stack>
@@ -193,4 +205,4 @@ const styles = {
     marginBottom: 10,
   },
 };
-export default Client;
+export default Employe;

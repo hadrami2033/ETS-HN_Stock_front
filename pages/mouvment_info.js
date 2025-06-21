@@ -28,6 +28,7 @@ const Infos = (props) => {
     typeId: typeId,
     magasinId: magasinId,
     quantity: 0,
+    rest: 0,
   };
 
   const [formValues, setFormValues] = useState(defaultValues);
@@ -87,7 +88,9 @@ const Infos = (props) => {
       setLoading(true)
       //console.log(values);
       var magasinmouvment = { ...values, dateCreation : formatDate(now), 
-        quantity: typeId === 1 ? parseInt(values.quantity) : parseInt(values.quantity)*-1 };
+        quantity: typeId === 1 ? parseInt(values.quantity) : parseInt(values.quantity)*-1,
+        rest: typeId === 1 ? (quantityEnStock+parseInt(values.quantity)) : (quantityEnStock-parseInt(values.quantity))
+      };
       console.log(magasinmouvment);
       axios.post(`magasinmouvments/add`, magasinmouvment).then(
           (res) => {

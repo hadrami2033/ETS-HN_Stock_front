@@ -46,6 +46,12 @@ const headCellsOpperation = [
        label: "Quantité"
     },
     {
+      id: 'rest',
+      numeric: false,
+      disablePadding: false,
+      label: "Quantité aprés mvmnt"
+   },
+    {
       id: 'type',
       numeric: false,
       disablePadding: false,
@@ -449,6 +455,7 @@ const StockMouvments = () => {
                       <TableCell align="left">{row.product && row.product.nom}</TableCell>
                       <TableCell align="left">{row.magasin && row.magasin.label}</TableCell>
                       <TableCell align="left">{row.quantity}</TableCell>
+                      <TableCell align="left">{row.rest}</TableCell>
                       <TableCell align="left">{row.type && row.type.label}</TableCell>
                       <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
                     </TableRow>
@@ -553,6 +560,7 @@ const StockMouvments = () => {
                       <TableCell align="left">{row.product && row.product.nom}</TableCell>
                       <TableCell align="left">{row.magasin && row.magasin.label}</TableCell>
                       <TableCell align="left">{row.quantity}</TableCell>
+                      <TableCell align="left">{row.rest}</TableCell>
                       <TableCell align="left">{row.type && row.type.label}</TableCell>
                       <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
                     </TableRow>
@@ -569,7 +577,7 @@ const StockMouvments = () => {
         }
       </Box>
       }
-
+ 
         {data2.length > 0 &&
           <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
             <div style={{width:"50%", display:'flex', alignItems:'center'}}>

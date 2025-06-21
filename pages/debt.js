@@ -16,7 +16,7 @@ import { useRouter } from "next/router";
 
 const Debt = (props) => {
   const {showSuccessToast,showFailedToast, selected, 
-    title, onUpdate, clientId} = props;
+    title, onUpdate, clientId, employeId} = props;
 
   const { authTokens } = useContext(AuthContext);
   const axios = useAxios();
@@ -25,6 +25,7 @@ const Debt = (props) => {
 
   const defaultValues = !selected ? {
     clientId: clientId,
+    employeId: employeId,
     amount: 0,
     description: "",
     amountPayed: 0,
@@ -41,7 +42,7 @@ const Debt = (props) => {
     if ("amount" in fieldValues)
       temp.amount = (fieldValues.amount && fieldValues.amount != "") ? "" : "le montant est requis";
     if ("newPayed" in fieldValues)
-      temp.newPayed = (!selected || (fieldValues.newPayed && fieldValues.newPayed != "" && 
+      temp.newPayed = (!selected || !clientId || (fieldValues.newPayed && fieldValues.newPayed != "" && 
       !(parseFloat(fieldValues.newPayed) > (parseFloat(values.amount)-parseFloat(values.amountPayed)) ) )) ? 
       "" : `montant payé est requis et ne dépasse pas ${(parseFloat(values.amount)-parseFloat(values.amountPayed))} CFA`;
    setErrors({
@@ -115,16 +116,23 @@ const Debt = (props) => {
     let now = new Date()
     let payed = parseFloat(values.newPayed);
     let cachierUpdate = {
-      solde: (parseFloat(cachier)+payed)
+      solde: selected ? (parseFloat(cachier)+payed) : (parseFloat(cachier)-parseFloat(values.amount))
     }
     let cachierMouvment = {
       amount: payed,
       dateCreation: formatDate(now),
       description : "paiement " + title + " le " +formatDate2(now)
     }
+
+    let cachierMouvment2 = {
+      amount: (parseFloat(values.amount)*-1),
+      dateCreation: formatDate(now),
+      description :  clientId ? title + " le " +formatDate2(now) : title + " le " +formatDate2(now)
+    }
+    
     console.log("cachierUpdate" ,cachierUpdate);
     if (validate()) {
-      setLoading(true) 
+      setLoading(true)
       var prod = { ...values, dateCreation : selected === null ? formatDate(now) : selected.dateCreation , 
         updatedAt : formatDate(now), amount: parseFloat(values.amount), amountPayed: (parseFloat(values.amountPayed)+parseFloat(values.newPayed)),
         payed : parseFloat(values.amount) === (parseFloat(values.amountPayed)+parseFloat(values.newPayed)) ? 1 : 0
@@ -137,6 +145,27 @@ const Debt = (props) => {
               resetForm();
               showSuccessToast() 
               onUpdate()
+              
+                axios.put(`cachier/${1}`, cachierUpdate).then(
+                  (res) => {
+                    console.log("cachierUpdate => " ,res.data);
+                    setCachier(cachierUpdate.solde)
+                  },
+                  (error) => {
+                    console.log(error);
+                    //showFailedToast()
+                  } 
+                ).then(() => 
+                  axios.post(`cachiermouvments/add`, cachierMouvment2).then(
+                    (res) => {
+                      console.log("cachiermouvments added => " ,res.data);
+                    },
+                    (error) => {
+                      console.log(error);
+                      //showFailedToast()
+                    } 
+                  )
+                )
             }else{
               showFailedToast()
             }
@@ -147,27 +176,6 @@ const Debt = (props) => {
           } 
         ).then(() => {
           setLoading(false)
-          if(payed > 0)
-            axios.put(`cachier/${1}`, cachierUpdate).then(
-              (res) => {
-                console.log("cachierUpdate => " ,res.data);
-                setCachier(cachierUpdate.solde)
-              },
-              (error) => {
-                console.log(error);
-                //showFailedToast()
-              } 
-            ).then(() => 
-              axios.post(`cachiermouvments/add`, cachierMouvment).then(
-                (res) => {
-                  console.log("cachiermouvments added => " ,res.data);
-                },
-                (error) => {
-                  console.log(error);
-                  //showFailedToast()
-                } 
-              )
-            )
         }); 
       }else{
         axios.put(`debts/${values.id}`, prod).then(
@@ -179,6 +187,27 @@ const Debt = (props) => {
             }else{
               onUpdate()
               showSuccessToast()
+              if(payed > 0)
+                axios.put(`cachier/${1}`, cachierUpdate).then(
+                  (res) => {
+                    console.log("cachierUpdate => " ,res.data);
+                    setCachier(cachierUpdate.solde)
+                  },
+                  (error) => {
+                    console.log(error);
+                    //showFailedToast()
+                  } 
+                ).then(() => 
+                  axios.post(`cachiermouvments/add`, cachierMouvment).then(
+                    (res) => {
+                      console.log("cachiermouvments added => " ,res.data);
+                    },
+                    (error) => {
+                      console.log(error);
+                      //showFailedToast()
+                    } 
+                  )
+                )
             }
           },
           (error) => {
@@ -187,27 +216,6 @@ const Debt = (props) => {
           } 
         ).then(() => {
           setLoading(false)
-          if(payed > 0)
-            axios.put(`cachier/${1}`, cachierUpdate).then(
-              (res) => {
-                console.log("cachierUpdate => " ,res.data);
-                setCachier(cachierUpdate.solde)
-              },
-              (error) => {
-                console.log(error);
-                //showFailedToast()
-              } 
-            ).then(() => 
-              axios.post(`cachiermouvments/add`, cachierMouvment).then(
-                (res) => {
-                  console.log("cachiermouvments added => " ,res.data);
-                },
-                (error) => {
-                  console.log(error);
-                  //showFailedToast()
-                } 
-              )
-            )
         });
       }
     } 
@@ -229,7 +237,7 @@ const Debt = (props) => {
               onChange={handleInputChange}
               error={errors.amount}
             />
-            :
+            : clientId &&
             <Controls.Input
               id="newPayed-input"
               name="newPayed"
