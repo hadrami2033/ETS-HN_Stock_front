@@ -66,6 +66,16 @@ const headCellsOpperation = [
     }
 ]
 
+const mouvmentType = [
+  {
+    id: 1,
+    label: 'Les gros'
+  },
+  {
+    id: 2,
+    label: "Les unités"
+  }
+]
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -152,6 +162,12 @@ const StockMouvments = () => {
     {
       startDate: formatDate2(new Date()),
       endDate: formatDate2(new Date())
+    }
+  )
+  const [mouvmentTypeSelected, setMouvmentTypeSelected] = React.useState(
+    {
+      id: 1,
+      label: 'Les gros'
     }
   )
 
@@ -317,8 +333,87 @@ const StockMouvments = () => {
     setMagasinId(event.target.value.id)
   };
 
+  const selectMouvment = (event) => {
+    setMouvmentTypeSelected(event.target.value)
+    if(event.target.value && event.target.value.id === 1 && magasinId){
+        setLoading(true)
+        axios.get(`magasinmouvments/bymagasinproductinterval?type=2&magasin=${magasinId}&product=${getBy}&startDate=${interval.startDate}&endDate=${interval.endDate}&pageNo=${pageNumber}&pageSize=${pageSize}`).then(
+            res => {
+              console.log("all dispo : ",res.data);
+              setData(res.data.content);
+              setHasNext(!res.data.last)
+              setTotalPages(res.data.totalPages)
+              setTotal(res.data.totalElements)
+              setPageNumber(res.data.pageNo)
+            }, 
+            error => {
+              console.log(error)
+              //if(error.response && error.response.status === 401)
+              //logoutUser()
+            }
+          )  
+          .then(() => {
+            axios.get(`magasinmouvments/bymagasinproductinterval?type=1&magasin=${magasinId}&product=${getBy}&startDate=${interval.startDate}&endDate=${interval.endDate}&pageNo=${pageNumber2}&pageSize=${pageSize2}`).then(
+              res => {
+                console.log("all indspo : ",res.data);
+                setData2(res.data.content);
+                setHasNext2(!res.data.last)
+                setTotalPages2(res.data.totalPages)
+                setTotal2(res.data.totalElements)
+                setPageNumber2(res.data.pageNo)
+              }, 
+              error => {
+                console.log(error)
+                //if(error.response && error.response.status === 401)
+                //logoutUser()
+              }
+            )  
+            }) 
+          .then(() => {
+          setLoading(false)
+          })
+    }else if(event.target.value && event.target.value.id === 2 && magasinId){
+      setLoading(true)
+      axios.get(`magasinunitsmouvments/bymagasinunitinterval?type=2&magasin=${magasinId}&unit=${getBy}&startDate=${interval.startDate}&endDate=${interval.endDate}&pageNo=${pageNumber}&pageSize=${pageSize}`).then(
+          res => {
+            console.log("all dispo : ",res.data);
+            setData(res.data.content);
+            setHasNext(!res.data.last)
+            setTotalPages(res.data.totalPages)
+            setTotal(res.data.totalElements)
+            setPageNumber(res.data.pageNo)
+          }, 
+          error => {
+            console.log(error)
+            //if(error.response && error.response.status === 401)
+            //logoutUser()
+          }
+        )  
+        .then(() => {
+          axios.get(`magasinunitsmouvments/bymagasinunitinterval?type=1&magasin=${magasinId}&unit=${getBy}&startDate=${interval.startDate}&endDate=${interval.endDate}&pageNo=${pageNumber2}&pageSize=${pageSize2}`).then(
+            res => {
+              console.log("all indspo : ",res.data);
+              setData2(res.data.content);
+              setHasNext2(!res.data.last)
+              setTotalPages2(res.data.totalPages)
+              setTotal2(res.data.totalElements)
+              setPageNumber2(res.data.pageNo)
+            }, 
+            error => {
+              console.log(error)
+              //if(error.response && error.response.status === 401)
+              //logoutUser()
+            }
+          )  
+          }) 
+        .then(() => {
+        setLoading(false)
+        })
+    }
+  };
+
   return (
-    <BaseCard titleColor={"primary"} title={"Suivi de stock"}>
+    <BaseCard titleColor={"primary"} title={"Suivi mouvement de stock"}>
             <Dialog maxWidth={'md'} open={openDate} onClose={handleCloseDate}>
                         <DialogContent>
                         <div style={{display:"flex", justifyContent:"end"}}>
@@ -397,6 +492,9 @@ const StockMouvments = () => {
             magasins = {magasins}
             magasinSelected = {magasinSelected}
             selectMagasin = {selectMagasin}
+            selectMouvment = {selectMouvment}
+            mouvmentType = {mouvmentType}
+            mouvmentTypeSelected = {mouvmentTypeSelected}
             onSearch = {onSearch}
             search={search}
             goSearch = {goSearch}
@@ -416,214 +514,214 @@ const StockMouvments = () => {
               </Tabs>
           </Box> 
 
-    <CustomTabPanel value={value} index={0}>
-      {loading ?
-        <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
-            <CircularProgress
-              size={24}
-                sx={{
-                color: 'primary',
-                position: 'absolute',
-                marginTop: '-12px',
-                marginLeft: '-12px',
-              }}
-            />
-        </Box>
-        :
-      <Box style={{width:'100%'}}>
-        {data.length > 0 ?
-        <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={'medium'}
-            >
-            <EnhancedTableHead
-                headCells={headCellsOpperation}
-                headerBG="#15659a"
-                txtColor="#DCDCDC"
-            />
-            <TableBody>
-                {data
-                .map((row, index) => {
-                    return (
-                    <TableRow
-                        hover
-                        tabIndex={-1}
-                        key={row.id}
-                    >
-                      <TableCell align="left"></TableCell>
-                      <TableCell align="left">{row.product && row.product.nom}</TableCell>
-                      <TableCell align="left">{row.magasin && row.magasin.label}</TableCell>
-                      <TableCell align="left">{row.quantity}</TableCell>
-                      <TableCell align="left">{row.rest}</TableCell>
-                      <TableCell align="left">{row.type && row.type.label}</TableCell>
-                      <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
-                    </TableRow>
-                    );
-                })}
-            </TableBody>
-        </Table>
-        :
-        <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
-            <Box style={{fontSize: '16px'}}>
-            Liste vide
+        <CustomTabPanel value={value} index={0}>
+          {loading ?
+            <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
+                <CircularProgress
+                  size={24}
+                    sx={{
+                    color: 'primary',
+                    position: 'absolute',
+                    marginTop: '-12px',
+                    marginLeft: '-12px',
+                  }}
+                />
             </Box>
-        </div>
-        }
-      </Box>
-      }
-
-        {data.length > 0 &&
-          <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
-            <div style={{width:"50%", display:'flex', alignItems:'center'}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
-              Total : {total}
-              </Box>
+            :
+          <Box style={{width:'100%'}}>
+            {data.length > 0 ?
+            <Table
+                sx={{ minWidth: 750 }}
+                aria-labelledby="tableTitle"
+                size={'medium'}
+                >
+                <EnhancedTableHead
+                    headCells={headCellsOpperation}
+                    headerBG="#15659a"
+                    txtColor="#DCDCDC"
+                />
+                <TableBody>
+                    {data
+                    .map((row, index) => {
+                        return (
+                        <TableRow
+                            hover
+                            tabIndex={-1}
+                            key={row.id}
+                        >
+                          <TableCell align="left"></TableCell>
+                          <TableCell align="left">{row.product ? row.product.nom : row.unit && row.unit.nom }</TableCell>
+                          <TableCell align="left">{row.magasin && row.magasin.label}</TableCell>
+                          <TableCell align="left">{row.quantity}</TableCell>
+                          <TableCell align="left">{row.rest}</TableCell>
+                          <TableCell align="left">{row.type && row.type.label}</TableCell>
+                          <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
+                        </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+            :
+            <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                <Box style={{fontSize: '16px'}}>
+                Liste vide
+                </Box>
             </div>
-            <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
-                {pageNumber}/{totalPages}
-              </Box>
+            }
+          </Box>
+          }
 
-              <Tooltip title="Précédente">
-               <span>
-                <IconButton disabled={(pageNumber==0)} onClick={previous}>
-                  <ArrowBack/>
-                </IconButton>
-                </span>
-              </Tooltip>
+            {data.length > 0 &&
+              <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
+                <div style={{width:"50%", display:'flex', alignItems:'center'}}>
+                  <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
+                  Total : {total}
+                  </Box>
+                </div>
+                <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
+                  <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
+                    {pageNumber}/{totalPages}
+                  </Box>
 
-              <Select
-                id="page-size-select"
-                value={pageSize}
-                onChange={handleSelectSizeChange }
-                label="pageSize"
-              >
-                <MenuItem value={pageSize}>
-                  <em>{pageSize}</em>
-                </MenuItem>
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={20}>20</MenuItem>
-              </Select>  
+                  <Tooltip title="Précédente">
+                  <span>
+                    <IconButton disabled={(pageNumber==0)} onClick={previous}>
+                      <ArrowBack/>
+                    </IconButton>
+                    </span>
+                  </Tooltip>
 
-              <Tooltip title="Suivante">
-                <span>
-                <IconButton disabled={!hasNext} onClick={next} >
-                  <ArrowForward/>
-                </IconButton>
-                </span>
-              </Tooltip>
-            </div>
-          </div>
-        }
-    </CustomTabPanel>
+                  <Select
+                    id="page-size-select"
+                    value={pageSize}
+                    onChange={handleSelectSizeChange }
+                    label="pageSize"
+                  >
+                    <MenuItem value={pageSize}>
+                      <em>{pageSize}</em>
+                    </MenuItem>
+                    <MenuItem value={5}>5</MenuItem>
+                    <MenuItem value={10}>10</MenuItem>
+                    <MenuItem value={20}>20</MenuItem>
+                  </Select>  
 
-    <CustomTabPanel value={value} index={1}>
-      {loading ?
-        <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
-            <CircularProgress
-              size={24}
-                sx={{
-                color: 'primary',
-                position: 'absolute',
-                marginTop: '-12px',
-                marginLeft: '-12px',
-              }}
-            />
-        </Box>
-        :
-      <Box style={{width:'100%'}}>
-        {data2.length > 0 ?
-        <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={'medium'}
-            >
-            <EnhancedTableHead
-                headCells={headCellsOpperation}
-                headerBG="#1A7795"
-                txtColor="#DCDCDC"
-            />
-            <TableBody>
-                {data2
-                .map((row, index) => {
-                    return (
-                    <TableRow
-                        hover
-                        //aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.id}
-                        //selected={isItemSelected}
-                    >
-                      <TableCell align="left"></TableCell>
-                      <TableCell align="left">{row.product && row.product.nom}</TableCell>
-                      <TableCell align="left">{row.magasin && row.magasin.label}</TableCell>
-                      <TableCell align="left">{row.quantity}</TableCell>
-                      <TableCell align="left">{row.rest}</TableCell>
-                      <TableCell align="left">{row.type && row.type.label}</TableCell>
-                      <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
-                    </TableRow>
-                    );
-                })}
-            </TableBody>
-        </Table>
-        :
-        <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
-            <Box style={{fontSize: '16px'}}>
-            Liste vide
+                  <Tooltip title="Suivante">
+                    <span>
+                    <IconButton disabled={!hasNext} onClick={next} >
+                      <ArrowForward/>
+                    </IconButton>
+                    </span>
+                  </Tooltip>
+                </div>
+              </div>
+            }
+        </CustomTabPanel>
+
+        <CustomTabPanel value={value} index={1}>
+          {loading ?
+            <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
+                <CircularProgress
+                  size={24}
+                    sx={{
+                    color: 'primary',
+                    position: 'absolute',
+                    marginTop: '-12px',
+                    marginLeft: '-12px',
+                  }}
+                />
             </Box>
-        </div>
-        }
-      </Box>
-      }
- 
-        {data2.length > 0 &&
-          <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
-            <div style={{width:"50%", display:'flex', alignItems:'center'}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
-              Total : {total2}
-              </Box>
+            :
+          <Box style={{width:'100%'}}>
+            {data2.length > 0 ?
+            <Table
+                sx={{ minWidth: 750 }}
+                aria-labelledby="tableTitle"
+                size={'medium'}
+                >
+                <EnhancedTableHead
+                    headCells={headCellsOpperation}
+                    headerBG="#1A7795"
+                    txtColor="#DCDCDC"
+                />
+                <TableBody>
+                    {data2
+                    .map((row, index) => {
+                        return (
+                        <TableRow
+                            hover
+                            //aria-checked={isItemSelected}
+                            tabIndex={-1}
+                            key={row.id}
+                            //selected={isItemSelected}
+                        >
+                          <TableCell align="left"></TableCell>
+                          <TableCell align="left">{row.product ? row.product.nom : row.unit && row.unit.nom }</TableCell>
+                          <TableCell align="left">{row.magasin && row.magasin.label}</TableCell>
+                          <TableCell align="left">{row.quantity}</TableCell>
+                          <TableCell align="left">{row.rest}</TableCell>
+                          <TableCell align="left">{row.type && row.type.label}</TableCell>
+                          <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
+                        </TableRow>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+            :
+            <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+                <Box style={{fontSize: '16px'}}>
+                Liste vide
+                </Box>
             </div>
-            <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
-              <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
-                {pageNumber2}/{totalPages2}
-              </Box>
+            }
+          </Box>
+          }
+    
+            {data2.length > 0 &&
+              <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
+                <div style={{width:"50%", display:'flex', alignItems:'center'}}>
+                  <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
+                  Total : {total2}
+                  </Box>
+                </div>
+                <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
+                  <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
+                    {pageNumber2}/{totalPages2}
+                  </Box>
 
-              <Tooltip title="Précédente">
-               <span>
-                <IconButton disabled={(pageNumber2==0)} onClick={previous2}>
-                  <ArrowBack/>
-                </IconButton>
-                </span>
-              </Tooltip>
+                  <Tooltip title="Précédente">
+                  <span>
+                    <IconButton disabled={(pageNumber2==0)} onClick={previous2}>
+                      <ArrowBack/>
+                    </IconButton>
+                    </span>
+                  </Tooltip>
 
-              <Select
-                id="page-size-select"
-                value={setPageSize2}
-                onChange={handleSelectSizeChange2 }
-                label="pageSize"
-              >
-                <MenuItem value={pageSize2}>
-                  <em>{pageSize2}</em>
-                </MenuItem>
-                <MenuItem value={5}>5</MenuItem>
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={20}>20</MenuItem>
-              </Select>  
+                  <Select
+                    id="page-size-select"
+                    value={setPageSize2}
+                    onChange={handleSelectSizeChange2 }
+                    label="pageSize"
+                  >
+                    <MenuItem value={pageSize2}>
+                      <em>{pageSize2}</em>
+                    </MenuItem>
+                    <MenuItem value={5}>5</MenuItem>
+                    <MenuItem value={10}>10</MenuItem>
+                    <MenuItem value={20}>20</MenuItem>
+                  </Select>  
 
-              <Tooltip title="Suivante">
-                <span>
-                <IconButton disabled={!hasNext2} onClick={next2} >
-                  <ArrowForward/>
-                </IconButton>
-                </span>
-              </Tooltip>
-            </div>
-          </div>
-        }
-    </CustomTabPanel>
-</Box>
+                  <Tooltip title="Suivante">
+                    <span>
+                    <IconButton disabled={!hasNext2} onClick={next2} >
+                      <ArrowForward/>
+                    </IconButton>
+                    </span>
+                  </Tooltip>
+                </div>
+              </div>
+            }
+        </CustomTabPanel>
+        </Box>
 
 
           

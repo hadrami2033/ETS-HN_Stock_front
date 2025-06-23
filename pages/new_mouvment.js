@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Alert, Tooltip, Snackbar, Box, CircularProgress, Select, MenuItem, Checkbox  } from "@mui/material";
+import { Alert, Tooltip, Snackbar, Box, CircularProgress, Select, MenuItem, Checkbox, Tabs, Tab  } from "@mui/material";
 import BaseCard from "../src/components/baseCard/BaseCard";
 import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
@@ -42,13 +42,28 @@ const headCellsOpperation = [
       numeric: false,
       disablePadding: false,
       label: 'Date création',
-    },
-    {
-      id: 'description',
-      numeric: false,
-      disablePadding: true,
-      label: 'Commentaire',
     }
+]
+
+const headCellsOpperation2 = [
+  {
+    id: 'nom',
+    numeric: false,
+    disablePadding: false,
+    label: 'Libelé',
+  }, 
+  {
+    id: 'prixVente',
+    numeric: false,
+    disablePadding: false,
+    label: "Prix de vente"
+  },
+  {
+    id: 'dateCreation',
+    numeric: false,
+    disablePadding: false,
+    label: 'Date création',
+  }
 ]
 
 
@@ -77,6 +92,13 @@ CustomTabPanel.propTypes = {
     index: PropTypes.number.isRequired,
     value: PropTypes.number.isRequired,
   };
+  
+function a11yProps(index) {
+    return {
+      id: `simple-tab-${index}`,
+      'aria-controls': `simple-tabpanel-${index}`,
+    };
+  }
 
 const Products = () => {
   const [openFailedToast, setOpenFailedToast] = React.useState(false);
@@ -88,7 +110,14 @@ const Products = () => {
   const [total, setTotal] = React.useState(0);
   const [pageNumber, setPageNumber] = React.useState(0);
   const [data, setData] = React.useState([]); 
+  const [hasNext2, setHasNext2] = React.useState(false);
+  const [pageSize2, setPageSize2] = React.useState(10);
+  const [totalPages2, setTotalPages2] = React.useState(0);
+  const [total2, setTotal2] = React.useState(0);
+  const [pageNumber2, setPageNumber2] = React.useState(0);
+  const [data2, setData2] = React.useState([]); 
   const [getBy, setGetBy] = React.useState("")
+  const [type, setType] = React.useState("product")
   const [search, setSearch] = React.useState("")
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState(null);
@@ -96,8 +125,12 @@ const Products = () => {
   const [magasins, setMagasins] = React.useState([]); 
   const [typeId, setTypeId] = React.useState(1); 
   const [quantityEnStock, setQuantityEnStock] = React.useState(0); 
+   const [value, setValue] = React.useState(0);
  
   const axios = useAxios();
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
   const { logoutUser } = useContext(AuthContext);
 
   useEffect(() => {
@@ -117,9 +150,25 @@ const Products = () => {
         }
       )
       .then(() => {
+        axios.get(`units/all?nom=${getBy}&pageNo=${pageNumber2}&pageSize=${pageSize2}`).then(
+          res => {
+            setData2(res.data.content);
+            setHasNext2(!res.data.last)
+            setTotalPages2(res.data.totalPages)
+            setTotal2(res.data.totalElements)
+            setPageNumber2(res.data.pageNo)
+          }, 
+          error => {
+            console.log(error)
+            if(error.response && error.response.status === 401)
+            logoutUser()
+          }
+        )
+      })
+      .then(() => {
       setLoading(false)
       })
-  }, [pageSize, pageNumber, getBy])
+  }, [pageSize, pageNumber, pageSize2, pageNumber2, getBy])
 
     useEffect(() => {
       axios.get(`magasins/all`).then(
@@ -227,10 +276,31 @@ const Products = () => {
   const previous = () => {
     setPageNumber(pageNumber-1)
   }
+
+  const handleSelectSizeChange2 = (event) => {    
+    return setPageSize2(event.target.value);
+  };
+
+  const next2 = () => {
+    setPageNumber2(pageNumber+1)
+  }
+  const previous2 = () => {
+    setPageNumber2(pageNumber-1)
+  }
   
   const handleClick = (event, row) => {
     if(!isSelected(row.id)){
         setSelected(row);
+        setType("product")
+      }else{
+        setSelected(null);
+    }
+   }
+
+   const handleClick2 = (event, row) => {
+    if(!isSelected(row.id)){
+        setSelected(row);
+        setType("unit")
       }else{
         setSelected(null);
     }
@@ -243,6 +313,7 @@ const Products = () => {
 
   const exportProduct = () => {
     setTypeId(2)
+    if(type=="product")
     axios.get(`magasinmouvments/stockproduct?magasin=${magasinSelected.id}&product=${selected.id}`).then(
         res => {
             console.log(res.data);
@@ -257,6 +328,21 @@ const Products = () => {
       .then(() => {
         openModal();
     })
+    else
+    axios.get(`magasinunitsmouvments/stockunit?magasin=${magasinSelected.id}&unit=${selected.id}`).then(
+      res => {
+          console.log(res.data);
+          setQuantityEnStock(res.data.quantity)
+      }, 
+      error => {
+        console.log(error)
+        //if(error.response && error.response.status === 401)
+        //logoutUser()
+      }
+    )
+    .then(() => {
+      openModal();
+    })
   }
 
   const selectMagasin = (event) => {
@@ -266,53 +352,61 @@ const Products = () => {
   return (
     <BaseCard title={"Nouveau mouvement de stock"}>
 
-            <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
-                <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-                    L'oppération réussie تمت العملية بنجاح
-                </Alert>
-            </Snackbar>
+      <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openSuccessToast} autoHideDuration={6000} onClose={closeSuccessToast}>
+          <Alert onClose={closeSuccessToast} severity="success" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
+              L'oppération réussie تمت العملية بنجاح
+          </Alert>
+      </Snackbar>
 
-            <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openFailedToast} autoHideDuration={6000} onClose={closeFailedToast}>
-                <Alert onClose={closeFailedToast} severity="error" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
-                    L'oppération a échoué فشل في العملية!
-                </Alert>
-            </Snackbar>
+      <Snackbar anchorOrigin={{vertical: 'top', horizontal: 'center'}} open={openFailedToast} autoHideDuration={6000} onClose={closeFailedToast}>
+          <Alert onClose={closeFailedToast} severity="error" sx={{ width: '100%' }} style={{fontSize:"24px",fontWeight:"bold"}}>
+              L'oppération a échoué فشل في العملية!
+          </Alert>
+      </Snackbar>
 
+      <Dialog fullWidth={true} maxWidth={'sm'} open={open} onClose={handleClose}>
+          <DialogContent>
+          <div style={{display:"flex", justifyContent:"end"}}>
+            <IconButton onClick={handleClose}>
+              <Close fontSize='medium'/>
+            </IconButton>
+          </div>
+          <Infos
+              productId = {selected && selected.id}
+              magasinId = {magasinSelected && magasinSelected.id}
+              type = {type}
+              typeId = {typeId}
+              quantityEnStock = {quantityEnStock}
+              title= {(typeId == 1 && selected) ? "Importer " + selected.nom + " dans " + magasinSelected.label : selected && "Exporter " + selected.nom + " de " + magasinSelected.label  }
+              showSuccessToast={showSuccessToast}
+              showFailedToast={showFailedToast}
+              handleClose={handleClose}
+          /> 
+          </DialogContent>
+      </Dialog>
 
-            <Dialog fullWidth={true} maxWidth={'sm'} open={open} onClose={handleClose}>
-                <DialogContent>
-                <div style={{display:"flex", justifyContent:"end"}}>
-                    <IconButton onClick={handleClose}>
-                    <Close fontSize='medium'/>
-                    </IconButton>
-                </div>
-                <Infos
-                    productId = {selected && selected.id}
-                    magasinId = {magasinSelected && magasinSelected.id}
-                    typeId = {typeId}
-                    quantityEnStock = {quantityEnStock} 
-                    title= {typeId == 1 ? "Ajouter un entree" : "Ajouter une sortie" }
-                    showSuccessToast={showSuccessToast}
-                    showFailedToast={showFailedToast}
-                    handleClose={handleClose}
-                /> 
-                </DialogContent>
-            </Dialog>
+      <EnhancedTableToolbar
+        magasins = {magasins}
+        magasinSelected = {magasinSelected}
+        selectMagasin = {selectMagasin}
+        importProduct = {importProduct}
+        exportProduct = {exportProduct}
+        productSelected = {selected}
+        onSearch = {onSearch}
+        search={search}
+        goSearch = {goSearch}
+      />
 
-          <EnhancedTableToolbar
-            magasins = {magasins}
-            magasinSelected = {magasinSelected}
-            selectMagasin = {selectMagasin}
-            importProduct = {importProduct}
-            exportProduct = {exportProduct}
-            productSelected = {selected}
-            onSearch = {onSearch}
-            search={search}
-            goSearch = {goSearch}
-          />
-
-      <Box sx={{ width: '100%', marginTop:'35px', marginLeft: '15px', whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden'}}>
+    <Box sx={{ width: '100%', marginTop:'35px', marginLeft: '15px', whiteSpace: "nowrap", overflowX: 'auto', overflowY: 'hidden'}}>
  
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={value} onChange={handleChange} aria-label="tabs">
+              <Tab style={{fontWeight:'bold', fontSize:'20px', width:'50%'}} label="Les produits" {...a11yProps(0)} />
+              <Tab style={{fontWeight:'bold', fontSize:'20px', width:'50%'}} label="Les unités des produits" {...a11yProps(1)} />
+          </Tabs>
+      </Box>
+
+      <CustomTabPanel value={value} index={0}>
 
       {loading ?
         <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
@@ -368,7 +462,6 @@ const Products = () => {
                       <TableCell align="left">{pounds.format(row.prixAchat)} CFA</TableCell>
                       <TableCell align="left">{pounds.format(row.prixVente)} CFA</TableCell>
                       <TableCell align="left">{formatDate(row.dateCreation)} </TableCell>
-                      <TableCell align="left">{row.description} </TableCell> 
                     </TableRow>
                     );
                 })}
@@ -428,8 +521,123 @@ const Products = () => {
             </div>
           </div>
         }
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={1}>
+        {loading ?
+          <Box style={{width:'100%', display:'flex', justifyContent:"center" }}>
+              <CircularProgress
+                size={24}
+                  sx={{
+                  color: 'primary',
+                  position: 'absolute',
+                  marginTop: '-12px',
+                  marginLeft: '-12px',
+                }}
+              />
+          </Box>
+          :
+        <Box style={{width:'100%'}}>
+          {data2.length > 0 ?
+          <Table
+              sx={{ minWidth: 750 }}
+              aria-labelledby="tableTitle"
+              size={'medium'}
+              >
+              <EnhancedTableHead
+                  headCells={headCellsOpperation2}
+                  headerBG="#15659a"
+                  txtColor="#DCDCDC"
+              />
+              <TableBody>
+                  {data2
+                  .map((row, index) => {
+                    const isItemSelected = isSelected(row.id);
+                    const labelId = `enhanced-table-checkbox-${index}`;
 
-</Box>
+                      return (
+                      <TableRow
+                          hover
+                          onClick={(event) => handleClick2(event, row)}
+                          role="checkbox"
+                          //aria-checked={isItemSelected}
+                          tabIndex={-1}
+                          key={row.id}
+                          //selected={isItemSelected}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            //color="secondary"
+                            checked={isItemSelected}
+                            inputProps={{ 
+                              'aria-labelledby': labelId,
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell align="left">{row.nom}</TableCell>
+                        <TableCell align="left">{pounds.format(row.prixVente)} CFA</TableCell>
+                        <TableCell align="left">{row.product && formatDate(row.product.dateCreation)} </TableCell>
+                      </TableRow>
+                      );
+                  })}
+              </TableBody>
+          </Table>
+          :
+          <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "center"}}>
+              <Box style={{fontSize: '16px'}}>
+              Liste vide
+              </Box>
+          </div>
+          }
+        </Box>
+        }
+
+          {data2.length > 0 &&
+            <div style={{width: "100%", marginTop: '20px', display: 'flex', justifyContent: "space-between"}}>
+              <div style={{width:"50%", display:'flex', alignItems:'center'}}>
+                <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'bold', color:"GrayText"}} >
+                Total : {total2}
+                </Box>
+              </div>
+              <div style={{width:"50%", display:'flex', alignItems:'center', justifyContent:"end"}}>
+                <Box style={{display:'flex', alignItems:'center', marginInline:"20px", fontWeight:'normal', color:"GrayText"}} >
+                  {pageNumber2}/{totalPages2}
+                </Box>
+
+                <Tooltip title="Précédente">
+                <span>
+                  <IconButton disabled={(pageNumber2==0)} onClick={previous2}>
+                    <ArrowBack/>
+                  </IconButton>
+                  </span>
+                </Tooltip>
+
+                <Select
+                  id="page-size-select"
+                  value={pageSize2}
+                  onChange={handleSelectSizeChange2 }
+                  label="pageSize"
+                >
+                  <MenuItem value={pageSize2}>
+                    <em>{pageSize2}</em>
+                  </MenuItem>
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                </Select>  
+
+                <Tooltip title="Suivante">
+                  <span>
+                  <IconButton disabled={!hasNext2} onClick={next2} >
+                    <ArrowForward/>
+                  </IconButton>
+                  </span>
+                </Tooltip>
+              </div>
+            </div>
+          }
+      </CustomTabPanel>
+
+    </Box>
 
 
           

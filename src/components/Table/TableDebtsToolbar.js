@@ -1,13 +1,18 @@
 import * as React from 'react';
 import { alpha } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
-import {  Fab, Stack, Tooltip, MenuItem, Select,  } from '@mui/material';
+import {  Fab, Stack, Tooltip, MenuItem, Select, Typography,  } from '@mui/material';
 import { Add } from '@mui/icons-material';
 
 const EnhancedTableToolbar = (props) => {
-    const { clients, employes, clientSelected, selectClient, openAdd } = props;
+    const { clients, employes, debt=null, clientSelected, selectClient, openAdd } = props;
     //console.log(selected);
-   
+    let pounds = Intl.NumberFormat( {
+      style: 'currency',
+      maximumSignificantDigits: 3,
+      minimumFractionDigits: 2
+    });
+
     return (
       <Toolbar
         style={{display:"flex", justifyContent: "space-between", marginBottom:30}}
@@ -43,6 +48,21 @@ const EnhancedTableToolbar = (props) => {
               </Select>
             </Stack>
             }
+
+                    {debt && 
+                    <Stack spacing={2} direction="row">
+                        <Typography
+                            align="right"
+                            color="inherit"
+                            variant="subtitle1"
+                            component="div"
+                            fontSize={20}
+                            //marginRight="30px"
+                            >
+                          Non payé : {pounds.format(debt)} CFA
+                        </Typography>
+                      </Stack>
+                    }
 
           {employes && 
             <Stack spacing={2} direction="row">

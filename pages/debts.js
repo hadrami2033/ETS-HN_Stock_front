@@ -121,11 +121,10 @@ const Debts = () => {updated
   const [data, setData] = React.useState([]); 
   const [clients, setClients] = React.useState([]); 
   const [data2, setData2] = React.useState([]); 
-  const [getBy, setGetBy] = React.useState("")
-  const [search, setSearch] = React.useState("")
   const [clientId, setClientId] = React.useState(null);
   const [clientSelected, setClientSelected] = React.useState(null);
-  const [valid, setValid] = React.useState(false);
+  const [clientDebt, setClientDebt] = React.useState(0);
+  const [clientPaid, setClientPaid] = React.useState(0);
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState(null);
   const [updated, setUpdated] = React.useState(false)
@@ -179,6 +178,30 @@ const Debts = () => {updated
           }
         )  
         }) 
+        .then(() => {
+          axios.get(`debts/clientdebt?client=${clientId}&payed=${0}`).then(
+              res => {
+              setClientDebt(res.data.debt)
+            }, 
+            error => {
+              console.log(error)
+              //if(error.response && error.response.status === 401)
+              logoutUser()
+            }
+          )  
+          }) 
+          .then(() => {
+            axios.get(`debts/clientpaiddebt?client=${clientId}&payed=${0}`).then(
+                res => {
+                setClientPaid(res.data.debt)
+              }, 
+              error => {
+                console.log(error)
+                //if(error.response && error.response.status === 401)
+                logoutUser()
+              }
+            )  
+            })
       .then(() => {
       setLoading(false)
       })
@@ -330,6 +353,7 @@ const Debts = () => {updated
 
           <EnhancedTableToolbar
             clients = {clients}
+            debt = {(clientDebt-clientPaid)}
             clientSelected = {clientSelected}
             selectClient = {selectClient}
             openAdd = {openAdd}

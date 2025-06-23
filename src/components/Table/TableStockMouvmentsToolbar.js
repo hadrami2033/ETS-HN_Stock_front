@@ -11,7 +11,7 @@ import FileUploadSharpIcon from '@mui/icons-material/FileUploadSharp';
 import FileDownloadSharpIcon from '@mui/icons-material/FileDownloadSharp';
 
 const EnhancedTableToolbar = (props) => {
-    const { onSearch, search, goSearch, magasins, magasinSelected, selectMagasin, importProduct, exportProduct, productSelected } = props;
+    const { mouvmentType = null, mouvmentTypeSelected = null, selectMouvment = null, onSearch, search, goSearch, magasins, magasinSelected, selectMagasin, importProduct, exportProduct, productSelected } = props;
     //console.log(selected);
    
     return (
@@ -49,6 +49,30 @@ const EnhancedTableToolbar = (props) => {
               </Select>
             </Stack>
             }
+
+          {mouvmentType && 
+            <Stack spacing={2} direction="row">
+              <Select
+                id="page-size-select"
+                value={mouvmentTypeSelected}
+                onChange={selectMouvment}
+                label="pageSize"
+                style={{fontSize:'15px', paddingInline: '10px', borderBottomWidth: 0}}
+                variant ="standard"
+              >
+                  {mouvmentTypeSelected &&
+                    <MenuItem style={{fontSize:'15px', fontWeight:'bold'}} value={mouvmentTypeSelected}>
+                      <em>{mouvmentTypeSelected.label}</em>
+                    </MenuItem>
+                  }
+                  {
+                    mouvmentType.map(
+                      m => <MenuItem style={{fontSize:'15px', fontWeight:'bold'}} value={m}>{m.label}</MenuItem>
+                    )
+                  }
+              </Select>
+            </Stack>
+          }
 
         {productSelected && 
         <Stack spacing={2} direction="row">

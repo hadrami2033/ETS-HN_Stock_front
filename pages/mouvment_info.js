@@ -16,14 +16,15 @@ import { useRouter } from "next/router";
 
 const Infos = (props) => {
   const {showSuccessToast,showFailedToast, productId, 
-    title, quantityEnStock, typeId, magasinId, handleClose } = props;
+    title, quantityEnStock, typeId, magasinId, handleClose, type } = props;
 
   const { authTokens } = useContext(AuthContext);
   const axios = useAxios();
   const router = useRouter()
   const { logoutUser } = useContext(AuthContext);
 
-  const defaultValues = {
+  const defaultValues =  
+  {
     productId: productId,
     typeId: typeId,
     magasinId: magasinId,
@@ -92,6 +93,7 @@ const Infos = (props) => {
         rest: typeId === 1 ? (quantityEnStock+parseInt(values.quantity)) : (quantityEnStock-parseInt(values.quantity))
       };
       console.log(magasinmouvment);
+      if(type=="product")
       axios.post(`magasinmouvments/add`, magasinmouvment).then(
           (res) => {
             console.log("added => " ,res);
@@ -107,6 +109,25 @@ const Infos = (props) => {
             console.log(error);
             showFailedToast()
           } 
+      ).then(() => {
+        setLoading(false)
+      }); 
+      else
+      axios.post(`magasinunitsmouvments/add`, {...magasinmouvment, unitId: magasinmouvment.productId}).then(
+        (res) => {
+          console.log("added => " ,res);
+          if(res.data){
+            resetForm();
+            handleClose()
+            showSuccessToast() 
+          }else{
+            showFailedToast()
+          }
+        },
+        (error) => {
+          console.log(error);
+          showFailedToast()
+        } 
       ).then(() => {
         setLoading(false)
       }); 
